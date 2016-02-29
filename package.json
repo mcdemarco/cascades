@@ -1,7 +1,7 @@
 {
-  "name": "react-slingshot",
-  "version": "1.1.1",
-  "description": "Starter kit for creating apps with React and Redux",
+  "name": "cascades",
+  "version": "0.0.1",
+  "description": "Solitaire game for the Decktet",
   "scripts": {
     "prestart": "npm run remove-dist",
     "start": "parallelshell \"npm run lint:tools\" \"npm run test:watch\" \"npm run open:src\"",
@@ -16,7 +16,7 @@
     "test": "cross-env NODE_ENV=test mocha --reporter progress --compilers js:babel-core/register --recursive \"./src/**/*.spec.js\"",
     "test:watch": "npm run test -- --watch"
   },
-  "author": "Cory House",
+  "author": "M. C. DeMarco",
   "license": "MIT",
   "dependencies": {
     "object-assign": "4.0.1",
@@ -76,7 +76,7 @@
     "starter"
   ],
   "repository": {
-    "type": "git",
-    "url": "https://github.com/coryhouse/react-slingshot"
+    "type": "hg",
+    "url": "https://bitbucket.org/mcdemarco/cascades"
   }
 }
