@@ -117,8 +117,7 @@ cascades.controller = function() {
 
 cascades.view = function(ctrl) {
 
-  return m("html", [
-    m("body", [
+  return m("div", [
 			
       // control buttons
       m("button", {onclick: ctrl.turn.bind(ctrl)}, "Turn"),
@@ -137,26 +136,22 @@ cascades.view = function(ctrl) {
         })
       ]),
 			
-      // Stock and waste.
-      m("h2","Stock"),
-      m("p",[
-        m("strong","Total: "),
-        ctrl.deck.length
+    // Stock and waste.
+		m("div", {className: "deckWrapper"}, [
+			m("div", {className: "stock"}, [
+				m("h2","Stock (" + ctrl.deck.length + ")"),
+				m("img", {className: "card", src: "cards/back.png"})
+			]),
+			m("div", {className: "waste"}, [
+				m("h2","Waste (" + ctrl.waste.length + ")"),
+				m("img", {className: "card", src: "cards/" + (ctrl.waste.length > 0 ? ctrl.waste[ctrl.waste.length - 1].image() : "blank.png")})
       ]),
-      m("h2","Waste"),
-      m("p",[
-        m("strong","Total: "),
-        ctrl.waste.length
-      ]),
-			m("div", {class: "card"}, [
-				m("img", {src: "cards/" + (ctrl.waste.length > 0 ? ctrl.waste[ctrl.waste.length - 1].image() : "blank.png")})
-			])
-    ])
+		])
   ]);
 }
 
 cascades.init = function() {
-  m.module(document,cascades);
+  m.module(document.getElementById("game"),cascades);
 }
 
 // start the app
