@@ -1,0 +1,453 @@
+﻿/*
+This file was created by Felbrigg Herriot and remixed by M.C.DeMarco, and is released under a 
+Creative Commons Attribution NonCommercial ShareAlike 3.0 License.
+*/
+
+/* Background pattern from subtlepatterns.com */
+
+/* basics */
+
+* {
+    box-sizing:border-box;
+}
+
+::selection {
+    background: transparent;
+}
+
+p::selection {
+    color:black;
+    background:#C3FEB5;
+}
+
+/* layout: width is 1110px */
+
+html, body {
+    margin:0;
+    height:100%;
+}
+
+#playarea {
+    padding:0 10px 10px 10px;
+}
+
+#playarea {
+    width:1122px;
+    margin: 0 auto;
+    height:100%;
+    padding-top:125px;
+    overflow:auto;
+}
+
+/* removed flex from header */
+
+div#header {
+    position:absolute;
+    top:0;
+    display:table;
+    width:1110px;
+    padding:10px 20px;
+}
+
+div#header > div {
+    display:table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+div#titleLeft {
+    color: #251;
+    line-height:1.0;
+}
+
+div#title {
+    color: #170;
+    font-size:xx-large;
+    font-weight:bold;
+    text-shadow:1px 1px 0px #030;
+}
+
+div#deckrow {
+    white-space:nowrap;
+}
+
+div#titleRight {
+    line-height:2.5;
+}
+
+
+/* Sizing
+   original card size: 100x150
+   teeny size: 62x87
+   remix card size (Adaman): 124x174
+   embiggened size (hypothetical): 186x261 (currently has original sizes in it for debugging)
+   card source file size: 372x522 
+*/
+
+.cardspace, .card, .card img.realBack {
+    width:124px;
+    height:174px;
+}
+
+.teeny.cardspace, .teeny.card, .teeny.card img.realBack, .teeny .back {
+    width:62px;
+    height:87px;
+}
+
+#drawDeckLocation.teeny.cardspace {
+    width:92px;
+}
+
+#drawDeckLocation.teeny.cardspace .back {
+    position:absolute;
+    top:0;
+    left:0;
+}
+
+#drawDeckLocation.teeny.cardspace .back .back {
+    position:absolute;
+    top:0;
+    left:10px;
+}
+
+.back {
+    background-image: url('../cards/back.png');
+    background-size: 62px 87px;
+}
+
+.chamber {
+    background-size: 62px 87px;
+}
+
+.cardspace {
+    position:relative;
+    margin:4px;
+}
+
+.card.shifted .card {
+    margin-left:22px;
+}
+
+.magnify .card.shifted .card {
+    margin-left:44px;
+}
+
+
+#drawDeckLocation {
+    margin-right:8px;
+}
+
+.card {
+    position:absolute;
+    top:0;
+    left:0;
+}
+
+.card .card {
+    top:22px;
+}
+
+.magnify .card .card {
+    top:44px;
+}
+
+.magnify .card {
+    background-size:248px 348px;
+    border-radius:12px 0 0 0;
+}
+
+/*.magnify .card img.realBack {
+    width:248px;
+    height:348px;
+    border-radius:12px 0 0 0;
+    -webkit-clip-path: inset(0px 124px 174px 0px);
+    clip-path: inset(0px 124px 174px 0px);
+}*/
+
+.cardspace, #drawDeckLocation {
+    position:relative;
+}
+
+.cardspace, .card, .back {
+    border-radius:6px;
+}
+
+.cardspace {
+    /* border:thin solid #170; */
+    background-color:rgba(64,115,52,0.4);/*17,119,0,0.4); */
+}
+
+.cardspace, .card {
+     display:inline-block;
+}
+
+.card, .card > img.realBack {
+    box-shadow: 0 1px 0 #432, 1px 1px 0 #432, -1px 1px 0 #432, 1px -1px 0 #432;
+}
+
+/*
+.card > img.realBack {
+    border:thin solid #432;
+}
+*/
+
+.card img.realBack {
+    border-radius:6px;
+}
+
+.card {
+    border-radius:6px;
+    border:thin solid #432; 
+}
+
+.card {
+    background-size:124px 174px;
+}
+
+.card.ui-draggable-dragging {
+    box-shadow: 5px 5px 15px 1px rgba(0,0,0,0.75);
+}
+
+.card img {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+.aceAdjust {
+    position:absolute;
+    top:0;
+    left:0;
+    box-sizing:content-box;
+    border: solid #fffefe;
+    border-width:2px 0 12px 2px;
+    border-radius:6px;
+    width:20px;
+    height:20px;
+    opacity:.99;
+}
+
+.magnify .aceAdjust {
+    border-radius:12px;
+    border-width:4px 0 24px 4px;
+    width:40px;
+    height:40px;
+}
+
+.suit1, .suit2, .suit3 {
+    position:absolute;
+    top:0;
+    margin-top: 2px;
+    background-color: #fffefe;
+    width:20px;
+    height:20px;
+    opacity:.69;
+}
+
+.magnify .suit1, .magnify .suit2, .magnify .suit3 {
+    margin-top: 10px;
+    width:25px;
+    height:25px;
+    border-radius:10px;
+}
+
+.suit1 {
+    left:20px;
+}
+.magnify .suit1 {
+    left:40px;
+}
+.suit2 {
+    left:40px;
+}
+.magnify .suit2 {
+    left:65px;
+}
+.suit3 {
+    left:60px;
+}
+.magnify .suit3 {
+    left:90px;
+}
+
+.topmost .suit1, .topmost .suit2, .topmost .suit3 {
+    display:none;
+}
+
+img.realBack {
+    position:absolute;
+    top:0;
+    left:0;
+}
+
+.chamber.Knots {
+    background-image: url('../cards/1_ace_knots.png');
+}
+.chamber.Moons {
+    background-image: url('../cards/1_ace_moons_black.png');
+}
+.chamber.Leaves {
+    background-image: url('../cards/1_ace_leaves.png');
+}
+.chamber.Suns {
+    background-image: url('../cards/1_ace_suns.png');
+}
+.chamber.Waves {
+    background-image: url('../cards/1_ace_waves.png');
+}
+.chamber.Wyrms {
+    background-image: url('../cards/1_ace_wyrms.png');
+}
+
+/* font */
+
+@font-face {
+    font-family: "Fortune Letters";
+    src: url(../css/fortune-letters.ttf) format("truetype");
+}
+
+body {
+    background-image:url('../css/skulls.png');
+    font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
+    color: #030;
+    margin:0;
+    padding:0;
+}
+
+button {
+    font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
+}
+
+#settingsPanel div p:first-child {
+    font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
+}
+
+p {
+    font-family: 'Segoe UI', 'Century Gothic', 'Lucida Grande', Tahoma, 'Gill Sans', sans-serif;
+    text-align:justify;
+}
+
+.magnify .panel {
+    font-size: 200%;
+}
+
+.magnify .panel input, .magnify .panel .button {
+    font-size: 30px;
+}
+
+p.callout {
+    padding: 0 5%;
+    font-style:italic;
+}
+
+.button {
+    clear:left;
+    margin-bottom:2px;
+    box-shadow:inset 0px 1px 0px 0px #C3FEB5;
+    background-color:#ACE890;
+    background:linear-gradient(to bottom, #ACE890, #40A728);
+    border-radius:6px;
+    border:1px solid #40A728;
+    display:inline-block;
+    white-space:nowrap;
+    color:#030;
+    font-size:14px;
+    padding:6px 10px;
+    text-decoration:none;
+    text-shadow:1px 1px 0px #C3FEB5;
+}
+
+.button:hover {
+    background-color:#40A728;
+    background:linear-gradient(to bottom, #40A728, #ACE890);
+    cursor:pointer;
+}
+
+.button:active {
+    position:relative;
+    top:1px;
+}
+
+.button:disabled {
+    background:none;
+    background-color:#b3b3b3;
+    border:1px solid #8A8A8A;
+}
+
+#startButton {
+    margin-top:10px;
+}
+
+#plusButton {
+    padding: 3px 5px;
+}
+
+.gamerow {
+    height:187px;
+    text-align:center;
+}
+
+.backgroundtext {
+    color: #97E684;
+}
+
+.decklabel {
+    color:#030;
+}
+
+.panel {
+    display:none;
+    text-align:center;
+    position:absolute;
+    top:0;
+    left:0;
+    min-height:500px;
+    height:auto;
+    background-color: rgba(114,169,101,0.90);
+    color:white;
+    font-weight:normal;
+    font-size:12pt;
+    margin:0;
+    padding: 5%;
+    z-index:51;
+}
+
+#settingsPanel div {
+    margin: 0;
+    display:table-row;
+}
+
+#settingsPanel div p {
+    display:table-cell;
+    text-align:left;
+    padding:10px 5px 30px 5px;
+}
+
+#settingsPanel div p:first-child {
+    /*width:30%;*/
+}
+
+hr {
+    border:0;
+    height:1px;
+    background: linear-gradient(to right, rgba(23, 104, 1, 0), rgba(23, 104, 1, 0.75), rgba(23, 104, 1, 0));
+}
+
+.linky {
+    cursor:pointer;
+    margin-top:5px;
+}
+
+a:link {
+    color:white;
+}
+
+a:visited {
+    color:#C3FEB5;
+}
+
+#timer {
+    display:inline-block;
+    width:40px;
+}
