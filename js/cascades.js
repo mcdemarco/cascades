@@ -140,7 +140,7 @@ cascades.view = function(ctrl) {
 		m("div", {className: "deckWrapper"}, [
 			m("div", {className: "stock"}, [
 				m("h2","Stock (" + ctrl.deck.length + ")"),
-				m("img", {className: "card", src: "cards/back.png"})
+				m("img", {className: "card", src: "cards/" + (ctrl.deck.length > 0 ? "back.png" : "blank.png")})
 			]),
 			m("div", {className: "waste"}, [
 				m("h2","Waste (" + ctrl.waste.length + ")"),
