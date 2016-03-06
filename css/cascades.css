@@ -29,7 +29,7 @@ body {
     font-family: 'Segoe UI', 'Century Gothic', 'Lucida Grande', Tahoma, 'Gill Sans', sans-serif;
     color: #030;
     margin:0;
-    padding:5%;
+    padding:0 0 0 5%;
 }
 
 h1, h2, h3 {
@@ -46,12 +46,12 @@ button {
 /* Sizing
    original card size: 100x150
    teeny size: 62x87
-   remix card size (Adaman): 124x174
-   embiggened size (hypothetical): 186x261 (currently has original sizes in it for debugging)
+   remix card size: 124x174
+   embiggened size: 186x261
    card source file size: 372x522 
 */
 
-img.card, .card img {
+img.card {
     width:124px;
     height:174px;
     border-radius:6px;
@@ -63,9 +63,27 @@ img.card, .card img {
     user-drag: none;
 }
 
+div.foundation {
+    height: 175px;
+    position: relative;
+}
+
+.foundation img.card {
+    position:absolute;
+}
+
 /* layout */
 
 div.stock, div.waste {
     float:left;
     padding-right:5%;
+}
+
+div.deckWrapper, div.foundationWrapper {
+    clear:both;
+}
+
+div.deckWrapper {
+    height: 225px;
+    margin-bottom:25px;
 }
