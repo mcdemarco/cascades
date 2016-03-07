@@ -3,36 +3,42 @@ var cascades = {};
 
 //model
 cascades.Card = function(data) {
-  this.rank = m.prop(data.rank);
-  this.suits = m.prop(data.suits);
-  this.name = m.prop(data.name);
-  this.image = m.prop(data.image);
+	this.rank = m.prop(data.rank);
+	this.suits = m.prop(data.suits);
+	this.name = m.prop(data.name);
+	this.image = m.prop(data.image);
+};
+
+cascades.Rules = function() {
+	return "Click on the stock pile to turn over three cards at a time, as in Klondike.  Click on the waste pile to move a card to the appropriate foundation row.  Ranks are moved to the rows in order, so the card can move to at most one of the rows.  For example, a six cannot appear in the third row until one has been placed in the second row.  For those ranks that appear in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows.  Rank order does not matter within a row, but a suit must match.";
 };
 
 cascades.Version = function(data) {
-  this.id = m.prop(data.id);
-  this.title = m.prop(data.title);
-  this.description = m.prop(data.description);
+	this.id = m.prop(data.id);
+	this.title = m.prop(data.title);
+	this.description = m.prop(data.description);
+	this.rules = m.prop(data.rules);
 };
 
 cascades.VersionList = function() {
 	list = [];
-	list.push(makeVersion(0, "Practice", "A version for practicing playing cards to the foundations."));
-	list.push(makeVersion(1, "Foundations with Aces", "An easier version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row."));
-	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where three reserve piles are uncovered during the three rounds of the game, and the top (rightmost) card is used to determine the suits of the foundation rows."));
+	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
+	list.push(makeVersion(1, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must include one of the suits of the two aces next to that foundation row."));
+	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where three reserve piles are uncovered during the three rounds of the game, and the top (rightmost) card is used to determine the suits of the foundation rows.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
 	return list;
 
-	function makeVersion(id, title, description) {
+	function makeVersion(id, title, description, rules) {
 		return new cascades.Version({
 			id: id,
 			title: title,
-			description: description
+			description: description,
+			rules: cascades.Rules() + " For this version (" + title + "), " + rules
 		});
 	}
 };
 
 cascades.Deck = function() {
-  deck = [];
+	deck = [];
 	deck.push(makeCard('Ace', ['Knots'], 'Ace of Knots', '1_ace_knots.png',1));
 	deck.push(makeCard('Ace', ['Leaves'], 'Ace of Leaves', '1_ace_leaves.png',1));
 	deck.push(makeCard('Ace', ['Moons'], 'Ace of Moons', '1_ace_moons.png',1));
@@ -92,15 +98,15 @@ cascades.Deck = function() {
 };
 
 cascades.shuffle = function(deck) {
-  var shuffled = [];
-  while(deck.length > 0) {
-    pos = Math.floor(Math.random() * deck.length);
-    taken = deck.splice(pos,1);
-    card = taken[0];
-    shuffled.push(taken[0]);
-  }
+	var shuffled = [];
+	while(deck.length > 0) {
+		pos = Math.floor(Math.random() * deck.length);
+		taken = deck.splice(pos,1);
+		card = taken[0];
+		shuffled.push(taken[0]);
+	}
 	
-  return shuffled;
+	return shuffled;
 };
 
 cascades.nextFoundation = function(rankCard, foundation) {
@@ -120,10 +126,10 @@ cascades.nextFoundation = function(rankCard, foundation) {
 };
 
 cascades.findOne = function (haystack, arr) {
-	//helper function from SO for suit comparison
-  return arr.some(function (v) {
-    return haystack.indexOf(v) >= 0;
-  });
+	//boolean helper function from SO for suit comparison
+	return arr.some(function (v) {
+		return haystack.indexOf(v) >= 0;
+	});
 };
 
 cascades.suitChecker = function(suitCard, row) {
@@ -133,7 +139,7 @@ cascades.suitChecker = function(suitCard, row) {
 	//Normal case.
 	var cardSuits = suitCard.suits();
 	var rowSuits = row[row.length - 1].suits();
-  return cascades.findOne(cardSuits, rowSuits);
+	return cascades.findOne(cardSuits, rowSuits);
 };
 
 
@@ -142,9 +148,11 @@ cascades.suitChecker = function(suitCard, row) {
 cascades.controller = function() {
 
 	this.deck = cascades.shuffle(cascades.Deck());
-  this.foundation = [[],[],[]];
-  this.waste = [];
+	this.foundation = [[],[],[]];
+	this.reserve = [[],[],[]];
+	this.waste = [];
 	this.message = "";
+	this.rules = "";
 	this.round = 1;
 	this.versions = cascades.VersionList();
 	this.version = 0;
@@ -152,10 +160,22 @@ cascades.controller = function() {
 	this.reset = function() {
 		this.deck = cascades.shuffle(cascades.Deck());
 		this.foundation = [[],[],[]];
+		this.reserve = [[],[],[]];
 		this.waste = [];
 		this.message = "";
+		this.rules = "";
 		this.round = 1;
 		this.versions = cascades.VersionList();
+	};
+
+	this.toggleRules = function() {
+		this.rules = this.rules ? "" : this.versions[this.version].rules();
+	};
+
+	this.changeVersion = function(newVersion) {
+		this.version = newVersion;
+		this.reset();
+		this.drawReserve(newVersion);
 	};
 
 	this.draw = function() {
@@ -165,6 +185,24 @@ cascades.controller = function() {
 		} else {
 			this.message = "Dealt last stock card.";
 		}
+	};
+
+	this.drawReserve = function(version) {
+		switch (version) {
+			case 0:
+			break;
+
+			case 1: 
+			break;
+			
+			case 2:
+			[0,1,2].map(function(val,idx) {
+				[0,1,2].map(function(val2,idx2) {
+					this.reserve[val].push(this.deck.pop());
+				});
+			});
+		}
+		return;
 	};
 	
 	this.turn = function() {
@@ -202,26 +240,30 @@ cascades.controller = function() {
 			}
 		}
 	};
-
-}
+};
 
 //view
 
 cascades.view = function(ctrl) {
 
-  return m("body", [
+	return m("body", [
 
 		m("header", [
-			m("h1", [
-				"Cascades ",
-				m("button", {onclick: ctrl.reset.bind(ctrl)}, "Restart")
+			m("h1", "Cascades"),
+			m("div", {className: "buttonWrapper"}, [
+				m("button", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
+				m("button", {onclick: ctrl.toggleRules.bind(ctrl)}, "Rules")
+			]),
+			m("div", {className: "rules"}, [
+				m("p", "a solitaire card game for the Decktet by Joe Conard"),
+				m("p", ctrl.rules)
 			])
 		]),
 		m("main", [
 			m("div", {className: "leftColumn"}, [
 				m("div", {className: "versionWrapper"}, [
-					m("h2", "Version"),
-					m('select', { onchange : function() { ctrl.version = this.value; }}, [
+					m("b", "Version: "),
+					m('select', { onchange : function() { ctrl.changeVersion(this.value); }}, [
 						ctrl.versions.map(function(v, i) {
 							return m('option', { value : v.id(), innerHTML : v.title() });
 						})
@@ -229,8 +271,8 @@ cascades.view = function(ctrl) {
 					m("p", ctrl.versions[ctrl.version].description())
 				]),
 				// Stock and waste.
+				m("h2", "Round " + Math.min(ctrl.round,3)),
 				m("div", {className: "deckWrapper"}, [
-					m("h2", "Round " + Math.min(ctrl.round,3)),
 					m("div", {className: "stock"}, [
 						m("h2","Stock (" + ctrl.deck.length + ")"),
 						m("img", {onclick: (ctrl.deck.length > 0 ? ctrl.turn.bind(ctrl) : ctrl.redeal.bind(ctrl)), className: "card", src: "cards/" + (ctrl.deck.length > 0 ? "back.png" : "blank.png")})
@@ -243,21 +285,46 @@ cascades.view = function(ctrl) {
 				m("div", {className: "message"}, ctrl.message)
 			]),
 			
+			// Reserve
+			m("div", {className: "reserveWrapper"}, [
+				m("div", [
+					m("div", {className: "reserve"}, [
+						m("img", {className: "card", src: "cards/blank.png"}),
+						ctrl.reserve[0].map(function(card,index) {
+							return m("img", {className: "card", src: "cards/" + card.image()});
+						})
+					]),
+					m("div", {className: "reserve"}, [
+						m("img", {className: "card", src: "cards/blank.png"}),
+						ctrl.reserve[1].map(function(card,index) {
+							return m("img", {className: "card", src: "cards/" + card.image()});
+						})
+					]),
+					m("div", {className: "reserve"}, [			
+						m("img", {className: "card", src: "cards/blank.png"}),	
+						ctrl.reserve[2].map(function(card,index) {
+							return m("img", {className: "card", src: "cards/" + card.image()});
+						})
+					])
+				])
+			]),
 			// foundation
 			m("div", {className: "foundationWrapper"}, [
-				m("h2","Foundation"),
 				m("div", [
-					m("div", {className: "foundation"}, [			
+					m("div", {className: "foundation"}, [
+						m("img", {className: "card", src: "cards/blank.png"}),		
 						ctrl.foundation[0].map(function(card,index) {
 							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
 						})
 					]),
-					m("div", {className: "foundation"}, [			
+					m("div", {className: "foundation"}, [
+						m("img", {className: "card", src: "cards/blank.png"}),
 						ctrl.foundation[1].map(function(card,index) {
 							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
 						})
 					]),
-					m("div", {className: "foundation"}, [			
+					m("div", {className: "foundation"}, [
+						m("img", {className: "card", src: "cards/blank.png"}),
 						ctrl.foundation[2].map(function(card,index) {
 							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
 						})
@@ -269,8 +336,9 @@ cascades.view = function(ctrl) {
 };
 
 cascades.init = function() {
-  m.module(document.getElementById("game"),cascades);
+	m.mount(document.getElementById("game"),cascades);
 };
 
 // start the app
 cascades.init();
+
