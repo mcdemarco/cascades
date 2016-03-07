@@ -64,8 +64,9 @@ img.card {
 }
 
 div.foundation {
-    height: 175px;
+    height: 180px;
     position: relative;
+    width: 300px;
 }
 
 .foundation img.card {
@@ -79,11 +80,18 @@ div.stock, div.waste {
     padding-right:5%;
 }
 
-div.deckWrapper, div.foundationWrapper {
-    clear:both;
+div.foundationWrapper {
+    float:left;
 }
 
 div.deckWrapper {
     height: 225px;
-    margin-bottom:25px;
+    width: 300px;
+    margin-top: 100px;
+    float:right;
+}
+
+div.message {
+    height: 20px;
+    color: coral;
 }

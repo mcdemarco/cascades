@@ -67,7 +67,7 @@ cascades.Deck = function() {
 			value: value
 		});
 	};
-}
+};
 
 cascades.shuffle = function(deck) {
   var shuffled = [];
@@ -79,24 +79,40 @@ cascades.shuffle = function(deck) {
   }
 	
   return shuffled;
-}
+};
 
-cascades.nextFoundation = function(rank, foundation) {
+cascades.nextFoundation = function(rankCard, foundation) {
 	//Determine what the next foundation for that rank should be.
-	var ranks = [0,0,0];
-	for (var r=0; r<3; r++) {
-		ranks[r] = foundation[r].reduce(function(acc,cardObj) {
-			debugger;
+	var rank = rankCard.rank();
+	var ranks = [0,0,0].map(function(initialVal,idx) {
+		return foundation[idx].reduce(function(acc,cardObj) {
 			return (cardObj.rank() == rank) ? acc + 1 : acc;
-		}, 0);
-	}
+		}, initialVal);
+	});
 	if (ranks[0] > ranks[1])
 		return 1;
 	else if (ranks[1] > ranks[2])
 		return 2;
 	else
 		return 0;
-}
+};
+
+cascades.findOne = function (haystack, arr) {
+	//helper function from SO for suit comparison
+  return arr.some(function (v) {
+    return haystack.indexOf(v) >= 0;
+  });
+};
+
+cascades.suitChecker = function(suitCard, row) {
+	//Degenerate case (adding to an empty foundation).
+	if (row.length == 0)
+		return true;
+	//Normal case.
+	var cardSuits = suitCard.suits();
+	var rowSuits = row[row.length - 1].suits();
+  return cascades.findOne(cardSuits, rowSuits);
+};
 
 
 //controller
@@ -106,31 +122,59 @@ cascades.controller = function() {
 	this.deck = cascades.shuffle(cascades.Deck());
   this.foundation = [[],[],[]];
   this.waste = [];
-
+	this.message = "";
+	this.round = 1;
+	
 	this.reset = function() {
 		this.deck = cascades.shuffle(cascades.Deck());
 		this.foundation = [[],[],[]];
 		this.waste = [];
+		this.message = "";
+		this.round = 1;
 	};
 
 	this.draw = function() {
-		if (this.deck.length > 0)
+		if (this.deck.length > 0) {
 			this.waste.push(this.deck.pop());
+			this.message = "";
+		} else {
+			this.message = "Dealt last stock card.";
+		}
 	};
 	
 	this.turn = function() {
 		for (var i = 0; i < 3; i++) {
 			this.draw();
 		}
+		if (this.deck.length == 0) 
+			this.round++;
+		if (this.round > 3)
+			this.message += " No more rounds.";
 	};
 
 	this.play = function() {
 		//Play a card from the waste or reserve(s) to the appropriate foundation row.
 		if (this.waste.length > 0) {
-			var rank = this.waste[this.waste.length - 1].rank();
-			var found = cascades.nextFoundation(rank,this.foundation);
-			if (true) //check for suit match
+			var playCard = this.waste[this.waste.length - 1];
+			var found = cascades.nextFoundation(playCard,this.foundation);
+			var playRow = this.foundation[found];
+			if (cascades.suitChecker(playCard,playRow)) {
 				this.foundation[found].push(this.waste.pop());
+				this.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
+			} else
+				this.message = "Suits do not match row " + (found + 1) + ".";
+		}
+	};
+
+	this.redeal = function() {
+		//The end of round flippy thing.
+		if (this.round > 3)
+			this.message = "No more rounds.";
+		else {
+			while (this.waste.length > 0) {
+				this.deck.push(this.waste.pop());
+				this.message = "Redealt.";
+			}
 		}
 	};
 
@@ -142,22 +186,12 @@ cascades.view = function(ctrl) {
 
   return m("div", [
 
-		// Stock and waste.
-		m("div", {className: "deckWrapper"}, [
-			m("div", {className: "stock"}, [
-				m("h2","Stock (" + ctrl.deck.length + ")"),
-				m("img", {className: "card", src: "cards/" + (ctrl.deck.length > 0 ? "back.png" : "blank.png")})
-			]),
-			m("div", {className: "waste"}, [
-				m("h2","Waste (" + ctrl.waste.length + ")"),
-				m("img", {className: "card", src: "cards/" + (ctrl.waste.length > 0 ? ctrl.waste[ctrl.waste.length - 1].image() : "blank.png")})
-      ]),
+		m("header", [
+			m("h1", [
+				"Cascades ",
+				m("button", {onclick: ctrl.reset.bind(ctrl)}, "Restart")
+			])	
 		]),
-		
-    // control buttons
-    m("button", {onclick: ctrl.turn.bind(ctrl)}, "Turn"),
-    m("button", {onclick: ctrl.play.bind(ctrl)}, "Play"),
-    m("button", {onclick: ctrl.reset.bind(ctrl)}, "Reset"),
 		
     // foundation
 		m("div", {className: "foundationWrapper"}, [
@@ -179,7 +213,23 @@ cascades.view = function(ctrl) {
 					})
 				])
 			])
-		])
+		]),
+
+		// Stock and waste.
+		m("div", {className: "deckWrapper"}, [
+			m("h2", "Round " + Math.min(ctrl.round,3)),
+			m("div", {className: "message"}, ctrl.message),
+			// control buttons
+			m("div", {className: "stock"}, [
+				m("h2","Stock (" + ctrl.deck.length + ")"),
+				m("img", {onclick: (ctrl.deck.length > 0 ? ctrl.turn.bind(ctrl) : ctrl.redeal.bind(ctrl)), className: "card", src: "cards/" + (ctrl.deck.length > 0 ? "back.png" : "blank.png")})
+			]),
+			m("div", {className: "waste"}, [
+				m("h2","Waste (" + ctrl.waste.length + ")"),
+				m("img", {className: "card", src: "cards/" + (ctrl.waste.length > 0 ? ctrl.waste[ctrl.waste.length - 1].image() : "blank.png"), onclick: ctrl.play.bind(ctrl)})
+      ]),
+		]),
+
   ]);
 }
 
