@@ -9,6 +9,28 @@ cascades.Card = function(data) {
   this.image = m.prop(data.image);
 };
 
+cascades.Version = function(data) {
+  this.id = m.prop(data.id);
+  this.title = m.prop(data.title);
+  this.description = m.prop(data.description);
+};
+
+cascades.VersionList = function() {
+	list = [];
+	list.push(makeVersion(0, "Practice", "A version for practicing playing cards to the foundations."));
+	list.push(makeVersion(1, "Foundations with Aces", "An easier version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row."));
+	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where three reserve piles are uncovered during the three rounds of the game, and the top (rightmost) card is used to determine the suits of the foundation rows."));
+	return list;
+
+	function makeVersion(id, title, description) {
+		return new cascades.Version({
+			id: id,
+			title: title,
+			description: description
+		});
+	}
+};
+
 cascades.Deck = function() {
   deck = [];
 	deck.push(makeCard('Ace', ['Knots'], 'Ace of Knots', '1_ace_knots.png',1));
@@ -55,7 +77,7 @@ cascades.Deck = function() {
 	deck.push(makeCard('CROWN', ['Suns'], 'the BARD', 'crown_suns.png',12));
 	deck.push(makeCard('CROWN', ['Waves'], 'the SEA', 'crown_waves.png',12));
 	deck.push(makeCard('CROWN', ['Wyrms'], 'the CALAMITY', 'crown_wyrms.png',12));
-//	deck.push(makeCard('', [], 'the EXCUSE', 'excuse.png', 0));
+	//	deck.push(makeCard('', [], 'the EXCUSE', 'excuse.png', 0));
 	return deck;
 	
 	function makeCard(rank, suits, name, image, value) {
@@ -71,7 +93,7 @@ cascades.Deck = function() {
 
 cascades.shuffle = function(deck) {
   var shuffled = [];
-  while(deck.length >0) {
+  while(deck.length > 0) {
     pos = Math.floor(Math.random() * deck.length);
     taken = deck.splice(pos,1);
     card = taken[0];
@@ -124,6 +146,8 @@ cascades.controller = function() {
   this.waste = [];
 	this.message = "";
 	this.round = 1;
+	this.versions = cascades.VersionList();
+	this.version = 0;
 	
 	this.reset = function() {
 		this.deck = cascades.shuffle(cascades.Deck());
@@ -131,6 +155,7 @@ cascades.controller = function() {
 		this.waste = [];
 		this.message = "";
 		this.round = 1;
+		this.versions = cascades.VersionList();
 	};
 
 	this.draw = function() {
@@ -184,58 +209,68 @@ cascades.controller = function() {
 
 cascades.view = function(ctrl) {
 
-  return m("div", [
+  return m("body", [
 
 		m("header", [
 			m("h1", [
 				"Cascades ",
 				m("button", {onclick: ctrl.reset.bind(ctrl)}, "Restart")
-			])	
-		]),
-		
-    // foundation
-		m("div", {className: "foundationWrapper"}, [
-			m("h2","Foundation"),
-			m("div", [
-				m("div", {className: "foundation"}, [			
-					ctrl.foundation[0].map(function(card,index) {
-						return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-					})
-				]),
-				m("div", {className: "foundation"}, [			
-					ctrl.foundation[1].map(function(card,index) {
-						return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-					})
-				]),
-				m("div", {className: "foundation"}, [			
-					ctrl.foundation[2].map(function(card,index) {
-						return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-					})
-				])
 			])
 		]),
-
-		// Stock and waste.
-		m("div", {className: "deckWrapper"}, [
-			m("h2", "Round " + Math.min(ctrl.round,3)),
-			m("div", {className: "message"}, ctrl.message),
-			// control buttons
-			m("div", {className: "stock"}, [
-				m("h2","Stock (" + ctrl.deck.length + ")"),
-				m("img", {onclick: (ctrl.deck.length > 0 ? ctrl.turn.bind(ctrl) : ctrl.redeal.bind(ctrl)), className: "card", src: "cards/" + (ctrl.deck.length > 0 ? "back.png" : "blank.png")})
+		m("main", [
+			m("div", {className: "leftColumn"}, [
+				m("div", {className: "versionWrapper"}, [
+					m("h2", "Version"),
+					m('select', { onchange : function() { ctrl.version = this.value; }}, [
+						ctrl.versions.map(function(v, i) {
+							return m('option', { value : v.id(), innerHTML : v.title() });
+						})
+					]),
+					m("p", ctrl.versions[ctrl.version].description())
+				]),
+				// Stock and waste.
+				m("div", {className: "deckWrapper"}, [
+					m("h2", "Round " + Math.min(ctrl.round,3)),
+					m("div", {className: "stock"}, [
+						m("h2","Stock (" + ctrl.deck.length + ")"),
+						m("img", {onclick: (ctrl.deck.length > 0 ? ctrl.turn.bind(ctrl) : ctrl.redeal.bind(ctrl)), className: "card", src: "cards/" + (ctrl.deck.length > 0 ? "back.png" : "blank.png")})
+					]),
+					m("div", {className: "waste"}, [
+						m("h2","Waste (" + ctrl.waste.length + ")"),
+						m("img", {className: "card", src: "cards/" + (ctrl.waste.length > 0 ? ctrl.waste[ctrl.waste.length - 1].image() : "blank.png"), onclick: ctrl.play.bind(ctrl)})
+					])
+				]),
+				m("div", {className: "message"}, ctrl.message)
 			]),
-			m("div", {className: "waste"}, [
-				m("h2","Waste (" + ctrl.waste.length + ")"),
-				m("img", {className: "card", src: "cards/" + (ctrl.waste.length > 0 ? ctrl.waste[ctrl.waste.length - 1].image() : "blank.png"), onclick: ctrl.play.bind(ctrl)})
-      ]),
-		]),
-
-  ]);
-}
+			
+			// foundation
+			m("div", {className: "foundationWrapper"}, [
+				m("h2","Foundation"),
+				m("div", [
+					m("div", {className: "foundation"}, [			
+						ctrl.foundation[0].map(function(card,index) {
+							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
+						})
+					]),
+					m("div", {className: "foundation"}, [			
+						ctrl.foundation[1].map(function(card,index) {
+							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
+						})
+					]),
+					m("div", {className: "foundation"}, [			
+						ctrl.foundation[2].map(function(card,index) {
+							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
+						})
+					])
+				])
+			])
+		])
+	]);
+};
 
 cascades.init = function() {
   m.module(document.getElementById("game"),cascades);
-}
+};
 
 // start the app
 cascades.init();

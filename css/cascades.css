@@ -1,23 +1,45 @@
-﻿/*
-This file was created by Felbrigg Herriot and remixed by M.C.DeMarco, and is released under a 
-Creative Commons Attribution NonCommercial ShareAlike 3.0 License.
-*/
-
-/* Background pattern from subtlepatterns.com */
+﻿/* Styles for Cascades by M. C. DeMarco.
+   Background pattern from subtlepatterns.com */
 
 /* basics */
 
 * {
     box-sizing:border-box;
 }
-/* layout: width is 1110px */
+
+/* layout */
 
 html, body {
     margin:0;
     height:100%;
 }
 
-/* font */
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+body, div.foundationWrapper {
+    padding:0 0 0 .66em;
+}
+
+main {
+    display: flex;
+}
+
+.leftColumn {
+    width: 300px;
+    flex: 0 0 300px;
+}
+
+div.stock, div.waste {
+    float:left;
+    padding-right:5%;
+}
+
+
+/* font and color */
 
 @font-face {
     font-family: "Fortune Letters";
@@ -28,8 +50,6 @@ body {
     background-image:url('../css/skulls.png');
     font-family: 'Segoe UI', 'Century Gothic', 'Lucida Grande', Tahoma, 'Gill Sans', sans-serif;
     color: #030;
-    margin:0;
-    padding:0 0 0 5%;
 }
 
 h1, h2, h3 {
@@ -38,6 +58,16 @@ h1, h2, h3 {
 
 button {
     font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
+}
+
+div.message {
+    padding-top: 40px;
+    color: coral;
+}
+
+div.versionWrapper p {
+    font-style:italic;
+    color:gray;
 }
 
 /* cards */
@@ -73,25 +103,6 @@ div.foundation {
     position:absolute;
 }
 
-/* layout */
 
-div.stock, div.waste {
-    float:left;
-    padding-right:5%;
-}
 
-div.foundationWrapper {
-    float:left;
-}
 
-div.deckWrapper {
-    height: 225px;
-    width: 300px;
-    margin-top: 100px;
-    float:right;
-}
-
-div.message {
-    height: 20px;
-    color: coral;
-}
