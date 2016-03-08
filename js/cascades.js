@@ -1,8 +1,8 @@
 //main js file
 
+//the data model is a bit of a separate component
 var cascades = {};
 
-//model
 cascades.Card = function(data) {
 	this.rank = m.prop(data.rank);
 	this.suits = m.prop(data.suits);
@@ -12,30 +12,6 @@ cascades.Card = function(data) {
 
 cascades.Rules = function() {
 	return "Click on the stock pile to turn over three cards at a time, as in Klondike.  You get three passes (rounds) through the stock pile; when the stock is empty, click on the empty space to redeal.  Click on the waste pile to move a face-up card to the appropriate foundation row.  Ranks are moved to the rows in order, so the card can move to at most one of the rows.  For example, a six cannot appear in the third row until one has been placed in the second row.  For those ranks that appear in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows.  Rank order does not matter within a row, but a suit must match.";
-};
-
-cascades.Version = function(data) {
-	this.id = m.prop(data.id);
-	this.title = m.prop(data.title);
-	this.description = m.prop(data.description);
-	this.rules = m.prop(data.rules);
-};
-
-cascades.VersionList = function() {
-	list = [];
-	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
-	list.push(makeVersion(1, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must include one of the suits of the two aces next to that foundation row."));
-	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
-	return list;
-
-	function makeVersion(id, title, description, rules) {
-		return new cascades.Version({
-			id: id,
-			title: title,
-			description: description,
-			rules: cascades.Rules() + " For this version (" + title + "), " + rules
-		});
-	}
 };
 
 cascades.Deck = function() {
@@ -144,11 +120,43 @@ cascades.suitChecker = function(suitCard, row) {
 };
 
 
-//a sample component
-var Version = {};
+//modal module
+var modal = {
+	visible: m.prop(false),
+	view: function(body) {
+		return modal.visible() ? m(".modal", body()) : "";
+	}
+};
+
+//The variants module.
+var variants = {};
+
+variants.Version = function(data) {
+	this.id = m.prop(data.id);
+	this.title = m.prop(data.title);
+	this.description = m.prop(data.description);
+	this.rules = m.prop(data.rules);
+};
+
+variants.VersionList = function() {
+	list = [];
+	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
+	list.push(makeVersion(1, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must include one of the suits of the two aces next to that foundation row."));
+	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
+	return list;
+
+	function makeVersion(id, title, description, rules) {
+		return new variants.Version({
+			id: id,
+			title: title,
+			description: description,
+			rules: cascades.Rules() + " For this version (" + title + "), " + rules
+		});
+	}
+};
 
 //controller
-Version.controller = function() {
+variants.controller = function() {
 
 	this.deck = cascades.shuffle(cascades.Deck());
 	this.foundation = [[],[],[]];
@@ -157,7 +165,7 @@ Version.controller = function() {
 	this.message = "";
 	this.rules = "";
 	this.round = 1;
-	this.versions = cascades.VersionList();
+	this.versions = variants.VersionList();
 	
 	this.reset = function() {
 		this.deck = cascades.shuffle(cascades.Deck());
@@ -167,17 +175,11 @@ Version.controller = function() {
 		this.message = "";
 		this.rules = "";
 		this.round = 1;
-		this.versions = cascades.VersionList();
+		this.versions = variants.VersionList();
 	};
 
 	this.toggleRules = function() {
 		this.rules = this.rules ? "" : this.versions[m.route.param("version")].rules();
-	};
-
-	this.changeVersion = function(newVersion) {
-		this.version = newVersion;
-		this.reset();
-		this.drawReserve(newVersion);
 	};
 
 	this.draw = function() {
@@ -246,19 +248,21 @@ Version.controller = function() {
 
 //view
 
-Version.view = function(ctrl) {
+variants.view = function(ctrl) {
 
 	return m("body", [
 
 		m("header", [
 			m("h1", "Cascades"),
 			m("div", {className: "buttonWrapper"}, [
-				m("button", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
-				m("button", {onclick: ctrl.toggleRules.bind(ctrl)}, "Rules")
+				m("button[type=button]", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
+				m("button[type=button]", {onclick: modal.visible.bind(this, true)}, "Rules")
 			]),
-			m("div", {className: "rules"}, [
+			m("div", {className: "description"}, [
 				m("p", "a solitaire card game for the Decktet by Joe Conard"),
-				m("p", ctrl.rules)
+				modal.view(function() {
+					return m("p", "modal text");
+				})
 			])
 		]),
 		m("main", [
@@ -356,5 +360,5 @@ m.route.mode = "hash";
 
 //define the routes
 m.route(document.body, "version2", {
-  "version:version": Version
+  "version:version": variants
 });
