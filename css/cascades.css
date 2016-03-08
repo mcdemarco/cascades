@@ -1,0 +1,144 @@
+﻿/* Styles for Cascades by M. C. DeMarco.
+   Background pattern from subtlepatterns.com */
+
+/* basics */
+
+* {
+    box-sizing:border-box;
+}
+
+/* layout */
+
+html, body {
+    margin:0;
+    height:100%;
+    width:100%;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+body {
+    padding:0 0 0 .66em;
+}
+
+header {
+    display: flex;
+}
+main {
+    display: flex;
+}
+
+header h1 {
+    flex: 0 0 300px;
+}
+div.leftColumn {
+    flex: 0 0 300px;
+}
+
+header div.buttonWrapper {
+    padding-top:20px;
+    flex: 0 0 175px;
+    text-align:center;
+}
+.reserveWrapper {
+    text-align:center;
+    flex: 0 0 175px;
+}
+
+header div.rules {
+    padding:10px;
+}
+/* .foundationWrapper is the third column in main */
+
+.deckWrapper {
+    display: flex;
+    justify-content: center;
+}
+
+div.stock, div.waste {
+    margin: 5px;
+}
+
+
+/* font and color */
+
+@font-face {
+    font-family: "Fortune Letters";
+    src: url(../css/fortune-letters.ttf) format("truetype");
+}
+
+body {
+    background-image:url('../css/skulls.png');
+    font-family: 'Segoe UI', 'Century Gothic', 'Lucida Grande', Tahoma, 'Gill Sans', sans-serif;
+    color: #030;
+}
+
+h1, h2, h3 {
+    font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
+}
+
+h1, h2, h3, .buttonWrapper {
+    text-align:center;
+}
+
+button {
+    margin:5px;
+    font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
+}
+
+div.message {
+    color: coral;
+    text-align:center;
+}
+
+div.versionWrapper p, div.rules {
+    font-style:italic;
+    color:darkslategray;
+}
+
+/* cards */
+
+/* Sizing
+   original card size: 100x150
+   teeny size: 62x87
+   remix card size: 124x174
+   embiggened size: 186x261
+   card source file size: 372x522 
+*/
+
+img.card {
+    width:124px;
+    height:174px;
+    border-radius:6px;
+    border:thin solid darkslategray; 
+    background-size:124px 174px;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+div.reserve, div.foundation {
+    height: 180px;
+    position: relative;
+}
+
+div.foundation {
+    min-width: 300px;
+}
+
+.foundation img.card, .reserve img.card {
+    position:absolute;
+}
+
+.reserve img.card {
+    left:20px;
+}
+
+
+
+
