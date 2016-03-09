@@ -11,7 +11,11 @@ cascades.Card = function(data) {
 };
 
 cascades.Rules = function() {
-	return "Click on the stock pile to turn over three cards at a time, as in Klondike.  You get three passes (rounds) through the stock pile; when the stock is empty, click on the empty space to redeal.  Click on the waste pile to move a face-up card to the appropriate foundation row.  Ranks are moved to the rows in order, so the card can move to at most one of the rows.  For example, a six cannot appear in the third row until one has been placed in the second row.  For those ranks that appear in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows.  Rank order does not matter within a row, but a suit must match.";
+	return m("div", {className: "rules"}, [
+		m("p", "Click on the stock pile to turn over three cards at a time, as in Klondike.  You get three passes (rounds) through the stock pile; when the stock is empty, click on the empty space to redeal."),
+		m("p", "Click on the waste pile to move a face-up card to the appropriate foundation row.  Ranks are moved to the rows in order, so the card can move to at most one of the rows.  For example, a six cannot appear in the third row until one has been placed in the second row.  For those ranks that appear in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows."),
+		m("p", "Rank order does not matter within a row, but a suit must match.")
+	]);
 };
 
 cascades.Deck = function() {
@@ -124,7 +128,7 @@ cascades.suitChecker = function(suitCard, row) {
 var modal = {
 	visible: m.prop(false),
 	view: function(body) {
-		return modal.visible() ? m(".modal", body()) : "";
+		return modal.visible() ? m("div.modal", body()) : "";
 	}
 };
 
@@ -150,7 +154,12 @@ variants.VersionList = function() {
 			id: id,
 			title: title,
 			description: description,
-			rules: cascades.Rules() + " For this version (" + title + "), " + rules
+			rules: m("div", [
+				m("h2", "Rules"),
+				cascades.Rules(),
+				m("p", " For this version (" + title + "), " + rules),
+				m("button[type=button]", {onclick: modal.visible.bind(this, false)}, "Close")
+			])
 		});
 	}
 };
@@ -256,13 +265,10 @@ variants.view = function(ctrl) {
 			m("h1", "Cascades"),
 			m("div", {className: "buttonWrapper"}, [
 				m("button[type=button]", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
-				m("button[type=button]", {onclick: modal.visible.bind(this, true)}, "Rules")
+				m("button[type=button]", {onclick: modal.visible.bind(ctrl, true)}, "Rules")
 			]),
-			m("div", {className: "description"}, [
-				m("p", "a solitaire card game for the Decktet by Joe Conard"),
-				modal.view(function() {
-					return m("p", "modal text");
-				})
+			m("div", [
+				m("p", {className: "description"}, "a solitaire card game for the Decktet by Joe Conard")
 			])
 		]),
 		m("main", [
@@ -340,7 +346,10 @@ variants.view = function(ctrl) {
 					])
 				])
 			])
-		])
+		]),
+		modal.view(function() {
+			return m("div", ctrl.versions[m.route.param("version")].rules());
+		})
 	]);
 };
 
