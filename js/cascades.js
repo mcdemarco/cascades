@@ -144,6 +144,30 @@ var modal = {
 	}
 };
 
+//row module
+cascades.rows = function(cardArray, classStub, shift) {
+	return m("div", {className: classStub + "Wrapper"}, [
+		m("div", {className: classStub}, [
+			m("img", {className: "card", src: "cards/blank.png"}),
+			cardArray[0].map(function(card,index) {
+				return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
+			})
+		]),
+		m("div", {className: classStub}, [
+			m("img", {className: "card", src: "cards/blank.png"}),
+			cardArray[1].map(function(card,index) {
+				return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
+			})
+		]),
+		m("div", {className: classStub}, [			
+			m("img", {className: "card", src: "cards/blank.png"}),	
+			cardArray[2].map(function(card,index) {
+				return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
+			})
+		])
+	]);
+};
+
 //The variants module.
 var variants = {};
 
@@ -311,68 +335,15 @@ variants.view = function(ctrl) {
 			]),
 
 			// Reserve
-			m("div", {className: "reserveWrapper"}, [
-				m("div", [
-					m("div", {className: "reserve"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),
-						ctrl.game.reserve[0].map(function(card,index) {
-							return m("img", {className: "card", src: "cards/" + card.image()});
-						})
-					]),
-					m("div", {className: "reserve"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),
-						ctrl.game.reserve[1].map(function(card,index) {
-							return m("img", {className: "card", src: "cards/" + card.image()});
-						})
-					]),
-					m("div", {className: "reserve"}, [			
-						m("img", {className: "card", src: "cards/blank.png"}),	
-						ctrl.game.reserve[2].map(function(card,index) {
-							return m("img", {className: "card", src: "cards/" + card.image()});
-						})
-					])
-				])
-			]),
-			// foundation
-			m("div", {className: "foundationWrapper"}, [
-				m("div", [
-					m("div", {className: "foundation"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),		
-						ctrl.game.foundation[0].map(function(card,index) {
-							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-						})
-					]),
-					m("div", {className: "foundation"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),
-						ctrl.game.foundation[1].map(function(card,index) {
-							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-						})
-					]),
-					m("div", {className: "foundation"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),
-						ctrl.game.foundation[2].map(function(card,index) {
-							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-						})
-					])
-				])
-			])
+			cascades.rows(ctrl.game.reserve, "reserve", false),
+			// Foundation
+			cascades.rows(ctrl.game.foundation, "foundation", true)
 		]),
 		modal.view(function() {
 			return m("div", ctrl.versions[m.route.param("version")].rules());
 		})
 	]);
 };
-
-/*
-cascades.init = function() {
-	m.mount(document.getElementById("game"),cascades);
-};
-
-// start the app
-cascades.init();
-
-*/
-
 
 //setup routes to start w/ the `#` symbol
 m.route.mode = "hash";
