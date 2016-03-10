@@ -97,7 +97,8 @@ cascades.Game = function() {
 		foundation: [[],[],[]],
 		reserve: [[],[],[]],
 		aces: [[],[],[]],
-		round: 1
+		round: 1,
+		message: ""
 	};
 	return game;
 };
@@ -135,6 +136,67 @@ cascades.suitChecker = function(suitCard, row) {
 	return cascades.findOne(cardSuits, rowSuits);
 };
 
+//row template
+cascades.rows = function(cardArray, classStub, shift) {
+	return m("div", {className: classStub + "Wrapper"},
+					 [0,1,2].map(function(val,idx) {
+						 return m("div", {className: classStub}, [
+							 m("img", {className: "card", src: "cards/blank.png"}),
+							 cardArray[val].map(function(card,index) {
+								 return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
+							 })
+						 ]);
+					 }));
+};
+
+cascades.draw = function(game) {
+	if (game.deck.length > 0) {
+		game.waste.push(game.deck.pop());
+		game.message = "";
+	} else {
+		game.message = "Dealt last stock card.";
+	}
+	return game;
+};
+
+cascades.turn = function(game) {
+	for (var i = 0; i < 3; i++) {
+		game = cascades.draw(game);
+	}
+	if (game.deck.length == 0) 
+		game.round++;
+	if (game.round > 3)
+		game.message += " No more rounds.";
+	return game;
+}
+
+cascades.play = function(game) {
+	//Play a card from the waste or reserve(s) to the appropriate foundation row.
+	if (game.waste.length > 0) {
+		var playCard = game.waste[game.waste.length - 1];
+		var found = cascades.nextFoundation(playCard,game.foundation);
+		var playRow = game.foundation[found];
+		if (cascades.suitChecker(playCard,playRow)) {
+			game.foundation[found].push(game.waste.pop());
+			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
+		} else
+			game.message = "Suits do not match row " + (found + 1) + ".";
+	}
+	return game;
+};
+
+cascades.redeal = function(game) {
+	//The end of round flippy thing.
+	if (game.round > 3)
+		game.message = "No more rounds.";
+	else {
+		while (game.waste.length > 0) {
+			game.deck.push(game.waste.pop());
+			game.message = "Redealt.";
+		}
+	}
+	return game;
+};
 
 //modal module
 var modal = {
@@ -142,30 +204,6 @@ var modal = {
 	view: function(body) {
 		return modal.visible() ? m("div.modal", body()) : "";
 	}
-};
-
-//row module
-cascades.rows = function(cardArray, classStub, shift) {
-	return m("div", {className: classStub + "Wrapper"}, [
-		m("div", {className: classStub}, [
-			m("img", {className: "card", src: "cards/blank.png"}),
-			cardArray[0].map(function(card,index) {
-				return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
-			})
-		]),
-		m("div", {className: classStub}, [
-			m("img", {className: "card", src: "cards/blank.png"}),
-			cardArray[1].map(function(card,index) {
-				return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
-			})
-		]),
-		m("div", {className: classStub}, [			
-			m("img", {className: "card", src: "cards/blank.png"}),	
-			cardArray[2].map(function(card,index) {
-				return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
-			})
-		])
-	]);
 };
 
 //The variants module.
@@ -204,33 +242,19 @@ variants.VersionList = function() {
 variants.controller = function() {
 
 	this.game = cascades.Game();
-/*	this.deck = cascades.shuffle(cascades.Deck());
-	this.foundation = [[],[],[]];
-	this.reserve = [[],[],[]];
-	this.waste = [];
-	this.round = 1;
-*/
-	this.message = "";
 	this.versions = variants.VersionList();
 	
 	this.reset = function() {
 		this.game = cascades.Game();
-		/*		this.deck = cascades.shuffle(cascades.Deck());
-		this.foundation = [[],[],[]];
-		this.reserve = [[],[],[]];
-		this.waste = [];
-		this.round = 1;
-		 */
-		this.message = "";
 		this.versions = variants.VersionList();
 	};
 
 	this.draw = function() {
 		if (this.game.deck.length > 0) {
 			this.game.waste.push(this.game.deck.pop());
-			this.message = "";
+			this.game.message = "";
 		} else {
-			this.message = "Dealt last stock card.";
+			this.game.message = "Dealt last stock card.";
 		}
 	};
 
@@ -253,39 +277,15 @@ variants.controller = function() {
 	};
 	
 	this.turn = function() {
-		for (var i = 0; i < 3; i++) {
-			this.draw();
-		}
-		if (this.game.deck.length == 0) 
-			this.game.round++;
-		if (this.game.round > 3)
-			this.message += " No more rounds.";
+		this.game = cascades.turn(this.game);
 	};
 
 	this.play = function() {
-		//Play a card from the waste or reserve(s) to the appropriate foundation row.
-		if (this.game.waste.length > 0) {
-			var playCard = this.game.waste[this.game.waste.length - 1];
-			var found = cascades.nextFoundation(playCard,this.game.foundation);
-			var playRow = this.game.foundation[found];
-			if (cascades.suitChecker(playCard,playRow)) {
-				this.game.foundation[found].push(this.game.waste.pop());
-				this.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
-			} else
-				this.message = "Suits do not match row " + (found + 1) + ".";
-		}
+		this.game = cascades.play(this.game);
 	};
 
 	this.redeal = function() {
-		//The end of round flippy thing.
-		if (this.game.round > 3)
-			this.message = "No more rounds.";
-		else {
-			while (this.game.waste.length > 0) {
-				this.game.deck.push(this.game.waste.pop());
-				this.message = "Redealt.";
-			}
-		}
+		this.game = cascades.redeal(this.game);
 	};
 };
 
@@ -320,18 +320,18 @@ variants.view = function(ctrl) {
 					m("p", ctrl.versions[m.route.param("version")].description())
 				]),
 				// Stock and waste.
-				m("h3", "Round " + Math.min(ctrl.game.round,3)),
+				m("h2", "Round " + Math.min(ctrl.game.round,3)),
 				m("div", {className: "deckWrapper"}, [
 					m("div", {className: "stock"}, [
-						m("h2","Stock (" + ctrl.game.deck.length + ")"),
+						m("h3","Stock (" + ctrl.game.deck.length + ")"),
 						m("img", {onclick: (ctrl.game.deck.length > 0 ? ctrl.turn.bind(ctrl) : ctrl.redeal.bind(ctrl)), className: "card", src: "cards/" + (ctrl.game.deck.length > 0 ? "back.png" : "blank.png")})
 					]),
 					m("div", {className: "waste"}, [
-						m("h2","Waste (" + ctrl.game.waste.length + ")"),
+						m("h3","Waste (" + ctrl.game.waste.length + ")"),
 						m("img", {className: "card", src: "cards/" + (ctrl.game.waste.length > 0 ? ctrl.game.waste[ctrl.game.waste.length - 1].image() : "blank.png"), onclick: ctrl.play.bind(ctrl)})
 					])
 				]),
-				m("div", {className: "message"}, ctrl.message)
+				m("div", {className: "message"}, ctrl.game.message)
 			]),
 
 			// Reserve
