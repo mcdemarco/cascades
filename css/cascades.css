@@ -16,9 +16,10 @@ html, body {
 }
 
 body {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
+    display: -webkit-flex;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
 }
 
 body {
@@ -26,27 +27,34 @@ body {
 }
 
 header {
+    display: -webkit-flex;
     display: flex;
     min-height: 66px;
+    -webkit-align-items: center;
     align-items: center;
 }
 main {
+    display: -webkit-flex;
     display: flex;
 }
 
 header h1 {
+    -webkit-flex: 0 0 300px;
     flex: 0 0 300px;
 }
 div.leftColumn {
+    -webkit-flex: 0 0 300px;
     flex: 0 0 300px;
 }
 
 header div.buttonWrapper {
+    -webkit-flex: 0 0 175px;
     flex: 0 0 175px;
     text-align:center;
 }
 .reserveWrapper {
     text-align:center;
+    -webkit-flex: 0 0 175px;
     flex: 0 0 175px;
 }
 
@@ -56,7 +64,9 @@ p.description {
 /* .foundationWrapper is the third column in main */
 
 .deckWrapper {
+    display: -webkit-flex;
     display: flex;
+    -webkit-justify-content: center;
     justify-content: center;
 }
 

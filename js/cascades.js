@@ -14,7 +14,7 @@ cascades.Rules = function() {
 	return m("div", {className: "rules"}, [
 		m("p", "Click on the stock pile to turn over three cards at a time, as in Klondike.  You get three passes (rounds) through the stock pile; when the stock is empty, click on the empty space to redeal."),
 		m("p", "Click on the waste pile to move a face-up card to the appropriate foundation row.  Ranks are moved to the rows in order, so the card can move to at most one of the rows.  For example, a six cannot appear in the third row until one has been placed in the second row.  For those ranks that appear in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows."),
-		m("p", "Rank order does not matter within a row, but a suit must match.")
+		m("p", "Rank order does not matter within a row, but a suit from the new card must match the row.")
 	]);
 };
 
@@ -139,14 +139,33 @@ cascades.suitChecker = function(suitCard, row) {
 //row template
 cascades.rows = function(cardArray, classStub, shift) {
 	return m("div", {className: classStub + "Wrapper"},
-					 [0,1,2].map(function(val,idx) {
-						 return m("div", {className: classStub}, [
-							 m("img", {className: "card", src: "cards/blank.png"}),
-							 cardArray[val].map(function(card,index) {
-								 return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
-							 })
-						 ]);
-					 }));
+	         [0,1,2].map(function(val,idx) {
+		         return m("div", {className: classStub}, [
+			         m("img", {className: "card", src: "cards/blank.png"}),
+			         cardArray[val].map(function(card,index) {
+				         return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
+			         })
+		         ]);
+	         }));
+};
+
+cascades.drawAces = function(game) {
+	[0,1,2].map(function(val,idx) {
+		[0,1].map(function(val2,idx2) {
+			var pos = game.deck.map(function(c) { return c.rank; }).indexOf('Ace');
+			game.reserve[val].push(game.deck.splice(pos));
+		});
+	});
+	return game;
+};
+
+cascades.drawReserve = function(game) {
+	[0,1,2].map(function(val,idx) {
+		[0,1,2].map(function(val2,idx2) {
+			game.reserve[val].push(game.deck.pop());
+		});
+	});
+	return game;
 };
 
 cascades.draw = function(game) {
@@ -218,9 +237,9 @@ variants.Version = function(data) {
 
 variants.VersionList = function() {
 	list = [];
-	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
-	list.push(makeVersion(1, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must include one of the suits of the two aces next to that foundation row."));
-	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
+	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	list.push(makeVersion(1, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must match at least one of the suits of the two aces next to that foundation row."));
+	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
 	return list;
 
 	function makeVersion(id, title, description, rules) {
@@ -247,6 +266,23 @@ variants.controller = function() {
 	this.reset = function() {
 		this.game = cascades.Game();
 		this.versions = variants.VersionList();
+		this.deal(m.route.param("version"));
+	};
+
+	this.deal = function(version) {
+		switch (version) {
+			case 0:
+			break;
+
+			case 1: 
+			this.game = cascades.drawAces(this.game);
+			break;
+			
+			case 2:
+			this.game = cascades.drawReserve(this.game);
+			break;
+		}
+		return;
 	};
 
 	this.draw = function() {
@@ -256,24 +292,6 @@ variants.controller = function() {
 		} else {
 			this.game.message = "Dealt last stock card.";
 		}
-	};
-
-	this.drawReserve = function(version) {
-		switch (version) {
-			case 0:
-			break;
-
-			case 1: 
-			break;
-			
-			case 2:
-			[0,1,2].map(function(val,idx) {
-				[0,1,2].map(function(val2,idx2) {
-					this.game.reserve[val].push(this.game.deck.pop());
-				});
-			});
-		}
-		return;
 	};
 	
 	this.turn = function() {
@@ -350,5 +368,5 @@ m.route.mode = "hash";
 
 //define the routes
 m.route(document.body, "version2", {
-  "version:version": variants
+	"version:version": variants
 });
