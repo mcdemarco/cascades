@@ -90,6 +90,22 @@ cascades.shuffle = function(deck) {
 	return shuffled;
 };
 
+cascades.deal = function(game) {
+	switch (m.route.param("version")) {
+	case "0":
+		break;
+		
+	case "1":
+		game = cascades.drawAces(game);
+		break;
+		
+	case "2":
+		game = cascades.drawReserve(game);
+		break;
+	}
+	return game;
+};
+
 cascades.Game = function() {
 	var game = {
 		deck: cascades.shuffle(cascades.Deck()),
@@ -100,6 +116,7 @@ cascades.Game = function() {
 		round: 1,
 		message: ""
 	};
+	game = cascades.deal(game);
 	return game;
 };
 
@@ -137,13 +154,13 @@ cascades.suitChecker = function(suitCard, row) {
 };
 
 //row template
-cascades.rows = function(cardArray, classStub, shift) {
+cascades.rows = function(cardArray, classStub, shift, round) {
 	return m("div", {className: classStub + "Wrapper"},
 	         [0,1,2].map(function(val,idx) {
 		         return m("div", {className: classStub}, [
 			         m("img", {className: "card", src: "cards/blank.png"}),
 			         cardArray[val].map(function(card,index) {
-				         return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
+				         return m("img", {className: "card", src: "cards/" + (round && (val + 1 >= round) ? "back.png" : card.image()), style: shift ? "left: " + index * 20 + "px": ""});
 			         })
 		         ]);
 	         }));
@@ -152,10 +169,19 @@ cascades.rows = function(cardArray, classStub, shift) {
 cascades.drawAces = function(game) {
 	[0,1,2].map(function(val,idx) {
 		[0,1].map(function(val2,idx2) {
-			var pos = game.deck.map(function(c) { return c.rank; }).indexOf('Ace');
-			game.reserve[val].push(game.deck.splice(pos));
+			var pos = game.deck.map(function(c) { return c.rank(); }).indexOf('Ace');
+			game.reserve[val].push(game.deck.splice(pos,1)[0]);
 		});
 	});
+/*
+	for (var r = 0; r < 3; r++) {
+		for (var a = 0; a < 2; a++) {
+			var pos = game.deck.map(function(c) { return c.rank(); }).indexOf('Ace');
+			game.reserve[r].push(game.deck.splice(pos)[0]);
+		};
+	};
+*/
+	debugger;
 	return game;
 };
 
@@ -265,26 +291,8 @@ variants.controller = function() {
 	
 	this.reset = function() {
 		this.game = cascades.Game();
-		this.versions = variants.VersionList();
-		this.deal(m.route.param("version"));
 	};
-
-	this.deal = function(version) {
-		switch (version) {
-			case 0:
-			break;
-
-			case 1: 
-			this.game = cascades.drawAces(this.game);
-			break;
-			
-			case 2:
-			this.game = cascades.drawReserve(this.game);
-			break;
-		}
-		return;
-	};
-
+	
 	this.draw = function() {
 		if (this.game.deck.length > 0) {
 			this.game.waste.push(this.game.deck.pop());
@@ -353,7 +361,7 @@ variants.view = function(ctrl) {
 			]),
 
 			// Reserve
-			cascades.rows(ctrl.game.reserve, "reserve", false),
+			cascades.rows(ctrl.game.reserve, "reserve", m.route.param("version") == "1", m.route.param("version") == "2" ? ctrl.game.round : undefined),
 			// Foundation
 			cascades.rows(ctrl.game.foundation, "foundation", true)
 		]),
