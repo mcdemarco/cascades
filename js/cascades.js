@@ -143,13 +143,14 @@ cascades.findOne = function (haystack, arr) {
 	});
 };
 
-cascades.suitChecker = function(suitCard, row) {
+cascades.suitChecker = function(suitCard, row, aceReserve) {
 	//Degenerate case (adding to an empty foundation).
-	if (row.length == 0)
+	var aces = m.route.param("version") == "1";
+	if (!aces && row.length == 0)
 		return true;
 	//Normal case.
 	var cardSuits = suitCard.suits();
-	var rowSuits = row[row.length - 1].suits();
+	var rowSuits = (aces ? aceReserve.map(function(cardObj,idx) { return cardObj.suits()[0]; }, []) : row[row.length - 1].suits());
 	return cascades.findOne(cardSuits, rowSuits);
 };
 
@@ -173,15 +174,6 @@ cascades.drawAces = function(game) {
 			game.reserve[val].push(game.deck.splice(pos,1)[0]);
 		});
 	});
-/*
-	for (var r = 0; r < 3; r++) {
-		for (var a = 0; a < 2; a++) {
-			var pos = game.deck.map(function(c) { return c.rank(); }).indexOf('Ace');
-			game.reserve[r].push(game.deck.splice(pos)[0]);
-		};
-	};
-*/
-	debugger;
 	return game;
 };
 
@@ -221,7 +213,8 @@ cascades.play = function(game) {
 		var playCard = game.waste[game.waste.length - 1];
 		var found = cascades.nextFoundation(playCard,game.foundation);
 		var playRow = game.foundation[found];
-		if (cascades.suitChecker(playCard,playRow)) {
+		var aceReserve = game.reserve[found];
+		if (cascades.suitChecker(playCard,playRow,aceReserve)) {
 			game.foundation[found].push(game.waste.pop());
 			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
 		} else
