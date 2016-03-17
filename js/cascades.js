@@ -145,7 +145,7 @@ cascades.findOne = function (haystack, arr) {
 
 cascades.suitChecker = function(suitCard, row, aceReserve) {
 	//Degenerate case (adding to an empty foundation).
-	var aces = m.route.param("version") == "1";
+	var aces = m.route.param("version") == "2";
 	if (!aces && row.length == 0)
 		return true;
 	//Normal case.
@@ -271,9 +271,9 @@ variants.Version = function(data) {
 
 variants.VersionList = function() {
 	list = [];
-	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
-	list.push(makeVersion(1, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must match at least one of the suits of the two aces next to that foundation row."));
-	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+//	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	list.push(makeVersion(1, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	list.push(makeVersion(2, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must match at least one of the suits of the two aces next to that foundation row."));
 	return list;
 
 	function makeVersion(id, title, description, rules) {
@@ -378,7 +378,7 @@ variants.view = function(ctrl) {
 		      return m("div", {className: "reserve"}, [
 			      m("img", {className: "card", src: "cards/blank.png"}),
 			      ctrl.game.reserve[row].map(function(card,index) {
-				      return m("img", {className: "card", src: "cards/" + (m.route.param("version") == "2" && (row + 1 >= ctrl.game.round) ? "back.png" : card.image()), style: m.route.param("version") == "1" ? "left: " + index * 20 + "px": "", onclick: (m.route.param("version") == "2" && (row + 1 < ctrl.game.round) ? ctrl.playReserve.bind(ctrl,row) : "" )});
+				      return m("img", {className: "card", src: "cards/" + (m.route.param("version") == "1" && (row + 1 >= ctrl.game.round) ? "back.png" : card.image()), style: m.route.param("version") == "2" ? "left: " + index * 20 + "px": "", onclick: (m.route.param("version") == "1" && (row + 1 < ctrl.game.round) ? ctrl.playReserve.bind(ctrl,row) : "" )});
 			      })
 		      ]);
 	      })
@@ -397,6 +397,6 @@ variants.view = function(ctrl) {
 m.route.mode = "hash";
 
 //define the routes
-m.route(document.body, "version2", {
+m.route(document.body, "version1", {
 	"version:version": variants
 });
