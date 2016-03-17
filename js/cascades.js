@@ -155,13 +155,13 @@ cascades.suitChecker = function(suitCard, row, aceReserve) {
 };
 
 //row template
-cascades.rows = function(cardArray, classStub, shift, round) {
+cascades.rows = function(cardArray, classStub, shift) {
 	return m("div", {className: classStub + "Wrapper"},
 	         [0,1,2].map(function(val,idx) {
 		         return m("div", {className: classStub}, [
 			         m("img", {className: "card", src: "cards/blank.png"}),
 			         cardArray[val].map(function(card,index) {
-				         return m("img", {className: "card", src: "cards/" + (round && (val + 1 >= round) ? "back.png" : card.image()), style: shift ? "left: " + index * 20 + "px": ""});
+				         return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
 			         })
 		         ]);
 	         }));
@@ -216,6 +216,21 @@ cascades.play = function(game) {
 		var aceReserve = game.reserve[found];
 		if (cascades.suitChecker(playCard,playRow,aceReserve)) {
 			game.foundation[found].push(game.waste.pop());
+			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
+		} else
+			game.message = "Suits do not match row " + (found + 1) + ".";
+	}
+	return game;
+};
+
+cascades.playReserve = function(game,row) {
+	//Play a card from the waste or reserve(s) to the appropriate foundation row.
+	if (game.reserve[row].length > 0) {
+		var playCard = game.reserve[row][game.reserve[row].length - 1];
+		var found = cascades.nextFoundation(playCard,game.foundation);
+		var playRow = game.foundation[found];
+		if (cascades.suitChecker(playCard,playRow)) {
+			game.foundation[found].push(game.reserve[row].pop());
 			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
 		} else
 			game.message = "Suits do not match row " + (found + 1) + ".";
@@ -303,6 +318,10 @@ variants.controller = function() {
 		this.game = cascades.play(this.game);
 	};
 
+	this.playReserve = function(row) {
+		this.game = cascades.playReserve(this.game,row);
+	};
+
 	this.redeal = function() {
 		this.game = cascades.redeal(this.game);
 	};
@@ -354,7 +373,17 @@ variants.view = function(ctrl) {
 			]),
 
 			// Reserve
-			cascades.rows(ctrl.game.reserve, "reserve", m.route.param("version") == "1", m.route.param("version") == "2" ? ctrl.game.round : undefined),
+			m("div", {className:  "reserveWrapper"},
+	      [0,1,2].map(function(row,idx) {
+		      return m("div", {className: "reserve"}, [
+			      m("img", {className: "card", src: "cards/blank.png"}),
+			      ctrl.game.reserve[row].map(function(card,index) {
+				      return m("img", {className: "card", src: "cards/" + (m.route.param("version") == "2" && (row + 1 >= ctrl.game.round) ? "back.png" : card.image()), style: m.route.param("version") == "1" ? "left: " + index * 20 + "px": "", onclick: (m.route.param("version") == "2" && (row + 1 < ctrl.game.round) ? ctrl.playReserve.bind(ctrl,row) : "" )});
+			      })
+		      ]);
+	      })
+			 ),
+			
 			// Foundation
 			cascades.rows(ctrl.game.foundation, "foundation", true)
 		]),
