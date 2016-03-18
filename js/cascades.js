@@ -50,14 +50,18 @@ cascades.Deck = function() {
 	deck.push(makeCard('9', ['Waves', 'Wyrms'], 'the DARKNESS', '9_darkness.png',9));
 	deck.push(makeCard('9', ['Leaves', 'Knots'], 'the MERCHANT', '9_merchant.png',9));
 	deck.push(makeCard('9', ['Moons', 'Suns'], 'the PACT', '9_pact.png',9));
-	deck.push(makeCard('PAWN', ['Waves', 'Leaves', 'Wyrms'], 'the BORDERLAND', 'pawn_borderland.png',10));
-	deck.push(makeCard('PAWN', ['Moons', 'Suns', 'Leaves'], 'the HARVEST', 'pawn_harvest.png',10));
-	deck.push(makeCard('PAWN', ['Suns', 'Waves', 'Knots'], 'the LIGHT KEEPER', 'pawn_light_keeper.png',10));
-	deck.push(makeCard('PAWN', ['Moons', 'Wyrms', 'Knots'], 'the WATCHMAN', 'pawn_watchman.png',10));
-	deck.push(makeCard('COURT', ['Moons', 'Waves', 'Knots'], 'the CONSUL', '11_court_consul.png',11));
-	deck.push(makeCard('COURT', ['Suns', 'Waves', 'Wyrms'], 'the ISLAND', '11_court_island.png',11));
-	deck.push(makeCard('COURT', ['Moons', 'Leaves', 'Wyrms'], 'the RITE', '11_court_rite.png',11));
-	deck.push(makeCard('COURT', ['Suns', 'Leaves', 'Knots'], 'the WINDOW', '11_court_window.png',11));
+	if (m.route.param("extended") == "pawns" || m.route.param("extended") == "both" ) {
+		deck.push(makeCard('PAWN', ['Waves', 'Leaves', 'Wyrms'], 'the BORDERLAND', 'pawn_borderland.png',10));
+		deck.push(makeCard('PAWN', ['Moons', 'Suns', 'Leaves'], 'the HARVEST', 'pawn_harvest.png',10));
+		deck.push(makeCard('PAWN', ['Suns', 'Waves', 'Knots'], 'the LIGHT KEEPER', 'pawn_light_keeper.png',10));
+		deck.push(makeCard('PAWN', ['Moons', 'Wyrms', 'Knots'], 'the WATCHMAN', 'pawn_watchman.png',10));
+	}
+	if (m.route.param("extended") == "crowns" || m.route.param("extended") == "both" ) {
+		deck.push(makeCard('COURT', ['Moons', 'Waves', 'Knots'], 'the CONSUL', '11_court_consul.png',11));
+		deck.push(makeCard('COURT', ['Suns', 'Waves', 'Wyrms'], 'the ISLAND', '11_court_island.png',11));
+		deck.push(makeCard('COURT', ['Moons', 'Leaves', 'Wyrms'], 'the RITE', '11_court_rite.png',11));
+		deck.push(makeCard('COURT', ['Suns', 'Leaves', 'Knots'], 'the WINDOW', '11_court_window.png',11));
+	}
 	deck.push(makeCard('CROWN', ['Knots'], 'the WINDFALL', 'crown_knots.png',12));
 	deck.push(makeCard('CROWN', ['Leaves'], 'the END', 'crown_leaves.png',12));
 	deck.push(makeCard('CROWN', ['Moons'], 'the HUNTRESS', 'crown_moons.png',12));
@@ -96,11 +100,11 @@ cascades.deal = function(game) {
 		break;
 		
 	case "1":
-		game = cascades.drawAces(game);
+		game = cascades.drawReserve(game);
 		break;
 		
 	case "2":
-		game = cascades.drawReserve(game);
+		game = cascades.drawAces(game);
 		break;
 	}
 	return game;
@@ -270,8 +274,8 @@ variants.Version = function(data) {
 };
 
 variants.VersionList = function() {
-	list = [];
-//	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	var list = [];
+	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
 	list.push(makeVersion(1, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
 	list.push(makeVersion(2, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must match at least one of the suits of the two aces next to that foundation row."));
 	return list;
@@ -291,11 +295,35 @@ variants.VersionList = function() {
 	}
 };
 
+variants.Extended = function(data) {
+	this.id = m.prop(data.id);
+	this.title = m.prop(data.title);
+	this.description = m.prop(data.description);
+};
+
+variants.ExtendedDeck = function() {
+	var list = [];
+	list.push(makeExtended("none","Base deck.","Don't use the extended deck."));
+	list.push(makeExtended("pawns","Pawns only","Include the Pawns from the extended deck."));
+	list.push(makeExtended("both","Pawns and Crowns.","Include both Pawns and Crowns from the extended deck."));
+	list.push(makeExtended("crowns","Crowns only.","Include the Pawns from the extended deck."));
+	return list;
+	
+	function makeExtended(id, title, description) {
+		return new variants.Extended({
+			id: id,
+			title: title,
+			description: description
+		});
+	}	
+}
+
 //controller
 variants.controller = function() {
 
 	this.game = cascades.Game();
 	this.versions = variants.VersionList();
+	this.extended = variants.ExtendedDeck();
 	
 	this.reset = function() {
 		this.game = cascades.Game();
@@ -347,7 +375,7 @@ variants.view = function(ctrl) {
 			m("div", {className: "leftColumn"}, [
 				m("div", {className: "versionWrapper"}, [
 					m("b", "Version: "),
-					m('select', { onchange : function() { m.route("version" + this.value); }}, [
+					m('select', { onchange : function() { m.route("version" + this.value + "/" + m.route.param("extended")); }}, [
 						ctrl.versions.map(function(v, i) {
 							if (v.id() == m.route.param("version"))
 								return m('option', { value: v.id(), innerHTML: v.title(), selected: "selected" });
@@ -355,8 +383,21 @@ variants.view = function(ctrl) {
 								return m('option', { value: v.id(), innerHTML: v.title() });
 						})
 					]),
-					m("p", ctrl.versions[m.route.param("version")].description())
+					m("p", ctrl.versions[m.route.param("version")].description()),
 				]),
+				m("div", {className: "versionWrapper"}, [
+					m("b", "Extended deck: "),
+					m('select', { onchange : function() {m.route("version" + m.route.param("version") + "/" + this.value); }}, [
+						ctrl.extended.map(function(e, i) {
+							if (e.id() == m.route.param("extended"))
+								return m('option', { value: e.id(), innerHTML: e.title(), selected: "selected" });
+							else
+								return m('option', { value: e.id(), innerHTML: e.title() });
+						})
+					]),
+					m("p", ctrl.extended.filter(function(e) {return e.id() === m.route.param("extended"); })[0].description())
+				]),
+				m("div", {className: "message"}, ctrl.game.message),
 				// Stock and waste.
 				m("h2", "Round " + Math.min(ctrl.game.round,3)),
 				m("div", {className: "deckWrapper"}, [
@@ -368,8 +409,7 @@ variants.view = function(ctrl) {
 						m("h3","Waste (" + ctrl.game.waste.length + ")"),
 						m("img", {className: "card", src: "cards/" + (ctrl.game.waste.length > 0 ? ctrl.game.waste[ctrl.game.waste.length - 1].image() : "blank.png"), onclick: ctrl.play.bind(ctrl)})
 					])
-				]),
-				m("div", {className: "message"}, ctrl.game.message)
+				])
 			]),
 
 			// Reserve
@@ -397,6 +437,6 @@ variants.view = function(ctrl) {
 m.route.mode = "hash";
 
 //define the routes
-m.route(document.body, "version1", {
-	"version:version": variants
+m.route(document.body, "version1/both", {
+	"version:version/:extended": variants
 });

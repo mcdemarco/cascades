@@ -45,6 +45,9 @@ header h1 {
 div.leftColumn {
     -webkit-flex: 0 0 300px;
     flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 header div.buttonWrapper {
@@ -132,6 +135,7 @@ button {
 div.message {
     color: coral;
     text-align:center;
+    min-height: 20px;
 }
 
 div.versionWrapper p, p.description {
