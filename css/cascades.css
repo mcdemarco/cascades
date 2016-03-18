@@ -16,9 +16,10 @@ html, body {
 }
 
 body {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
+    display: -webkit-flex;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
 }
 
 body {
@@ -26,36 +27,49 @@ body {
 }
 
 header {
+    display: -webkit-flex;
     display: flex;
+    min-height: 66px;
+    -webkit-align-items: center;
+    align-items: center;
 }
 main {
+    display: -webkit-flex;
     display: flex;
 }
 
 header h1 {
+    -webkit-flex: 0 0 300px;
     flex: 0 0 300px;
 }
 div.leftColumn {
+    -webkit-flex: 0 0 300px;
     flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 header div.buttonWrapper {
-    padding-top:20px;
+    -webkit-flex: 0 0 175px;
     flex: 0 0 175px;
     text-align:center;
 }
 .reserveWrapper {
     text-align:center;
+    -webkit-flex: 0 0 175px;
     flex: 0 0 175px;
 }
 
-header div.rules {
-    padding:10px;
+p.description {
+    white-space:nowrap;
 }
 /* .foundationWrapper is the third column in main */
 
 .deckWrapper {
+    display: -webkit-flex;
     display: flex;
+    -webkit-justify-content: center;
     justify-content: center;
 }
 
@@ -63,6 +77,28 @@ div.stock, div.waste {
     margin: 5px;
 }
 
+div.modal {
+    position: fixed;
+    top: 20%;
+    right: 10%;
+    width:40%;
+    min-width:300px;
+    padding: 10px;
+    border: 2px solid darkslategray;
+    border-radius: 12px;
+    z-index: 3;
+    box-shadow:0 1px 8px rgba(47,79,79,0.4);
+    background: linear-gradient(rgba(47,79,79,0.2), rgba(47,79,79,0.2)), url('../css/skulls.png');
+    text-align:center;
+}
+
+div.modal p {
+    text-align: justify;
+}
+
+div.rules {
+
+}
 
 /* font and color */
 
@@ -72,7 +108,7 @@ div.stock, div.waste {
 }
 
 body {
-    background-image:url('../css/skulls.png');
+    background-image: url('../css/skulls.png');
     font-family: 'Segoe UI', 'Century Gothic', 'Lucida Grande', Tahoma, 'Gill Sans', sans-serif;
     color: #030;
 }
@@ -85,19 +121,27 @@ h1, h2, h3, .buttonWrapper {
     text-align:center;
 }
 
+h2, h3 {
+    margin-top: 0;
+    padding-top: 0;
+}
+
 button {
     margin:5px;
     font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
+    font-size: medium;
 }
 
 div.message {
     color: coral;
     text-align:center;
+    min-height: 20px;
 }
 
-div.versionWrapper p, div.rules {
-    font-style:italic;
+div.versionWrapper p, p.description {
     color:darkslategray;
+    font-style:italic;
+    font-size:smaller;
 }
 
 /* cards */
@@ -138,7 +182,5 @@ div.foundation {
 .reserve img.card {
     left:20px;
 }
-
-
 
 

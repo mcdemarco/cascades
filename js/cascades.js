@@ -1,7 +1,8 @@
 //main js file
+
+//the data model is a bit of a separate component
 var cascades = {};
 
-//model
 cascades.Card = function(data) {
 	this.rank = m.prop(data.rank);
 	this.suits = m.prop(data.suits);
@@ -10,31 +11,11 @@ cascades.Card = function(data) {
 };
 
 cascades.Rules = function() {
-	return "Click on the stock pile to turn over three cards at a time, as in Klondike.  Click on the waste pile to move a card to the appropriate foundation row.  Ranks are moved to the rows in order, so the card can move to at most one of the rows.  For example, a six cannot appear in the third row until one has been placed in the second row.  For those ranks that appear in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows.  Rank order does not matter within a row, but a suit must match.";
-};
-
-cascades.Version = function(data) {
-	this.id = m.prop(data.id);
-	this.title = m.prop(data.title);
-	this.description = m.prop(data.description);
-	this.rules = m.prop(data.rules);
-};
-
-cascades.VersionList = function() {
-	list = [];
-	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
-	list.push(makeVersion(1, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must include one of the suits of the two aces next to that foundation row."));
-	list.push(makeVersion(2, "Foundations with Reserve Piles", "A harder version where three reserve piles are uncovered during the three rounds of the game, and the top (rightmost) card is used to determine the suits of the foundation rows.", "the suit(s) of a card must overlap with those of the last card on that foundation row."));
-	return list;
-
-	function makeVersion(id, title, description, rules) {
-		return new cascades.Version({
-			id: id,
-			title: title,
-			description: description,
-			rules: cascades.Rules() + " For this version (" + title + "), " + rules
-		});
-	}
+	return m("div", {className: "rules"}, [
+		m("p", "Click on the stock pile to turn over three cards at a time, as in Klondike.  You get three passes (rounds) through the stock pile; when the stock is empty, click on the empty space to redeal."),
+		m("p", "Click on the waste pile to move a face-up card to the appropriate foundation row.  Ranks are moved to the rows in order, so the card can move to at most one of the rows.  For example, a six cannot appear in the third row until one has been placed in the second row.  For those ranks that appear in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows."),
+		m("p", "Rank order does not matter within a row, but a suit from the new card must match the row.")
+	]);
 };
 
 cascades.Deck = function() {
@@ -69,14 +50,18 @@ cascades.Deck = function() {
 	deck.push(makeCard('9', ['Waves', 'Wyrms'], 'the DARKNESS', '9_darkness.png',9));
 	deck.push(makeCard('9', ['Leaves', 'Knots'], 'the MERCHANT', '9_merchant.png',9));
 	deck.push(makeCard('9', ['Moons', 'Suns'], 'the PACT', '9_pact.png',9));
-	deck.push(makeCard('PAWN', ['Waves', 'Leaves', 'Wyrms'], 'the BORDERLAND', 'pawn_borderland.png',10));
-	deck.push(makeCard('PAWN', ['Moons', 'Suns', 'Leaves'], 'the HARVEST', 'pawn_harvest.png',10));
-	deck.push(makeCard('PAWN', ['Suns', 'Waves', 'Knots'], 'the LIGHT KEEPER', 'pawn_light_keeper.png',10));
-	deck.push(makeCard('PAWN', ['Moons', 'Wyrms', 'Knots'], 'the WATCHMAN', 'pawn_watchman.png',10));
-	deck.push(makeCard('COURT', ['Moons', 'Waves', 'Knots'], 'the CONSUL', '11_court_consul.png',11));
-	deck.push(makeCard('COURT', ['Suns', 'Waves', 'Wyrms'], 'the ISLAND', '11_court_island.png',11));
-	deck.push(makeCard('COURT', ['Moons', 'Leaves', 'Wyrms'], 'the RITE', '11_court_rite.png',11));
-	deck.push(makeCard('COURT', ['Suns', 'Leaves', 'Knots'], 'the WINDOW', '11_court_window.png',11));
+	if (m.route.param("extended") == "pawns" || m.route.param("extended") == "both" ) {
+		deck.push(makeCard('PAWN', ['Waves', 'Leaves', 'Wyrms'], 'the BORDERLAND', 'pawn_borderland.png',10));
+		deck.push(makeCard('PAWN', ['Moons', 'Suns', 'Leaves'], 'the HARVEST', 'pawn_harvest.png',10));
+		deck.push(makeCard('PAWN', ['Suns', 'Waves', 'Knots'], 'the LIGHT KEEPER', 'pawn_light_keeper.png',10));
+		deck.push(makeCard('PAWN', ['Moons', 'Wyrms', 'Knots'], 'the WATCHMAN', 'pawn_watchman.png',10));
+	}
+	if (m.route.param("extended") == "crowns" || m.route.param("extended") == "both" ) {
+		deck.push(makeCard('COURT', ['Moons', 'Waves', 'Knots'], 'the CONSUL', '11_court_consul.png',11));
+		deck.push(makeCard('COURT', ['Suns', 'Waves', 'Wyrms'], 'the ISLAND', '11_court_island.png',11));
+		deck.push(makeCard('COURT', ['Moons', 'Leaves', 'Wyrms'], 'the RITE', '11_court_rite.png',11));
+		deck.push(makeCard('COURT', ['Suns', 'Leaves', 'Knots'], 'the WINDOW', '11_court_window.png',11));
+	}
 	deck.push(makeCard('CROWN', ['Knots'], 'the WINDFALL', 'crown_knots.png',12));
 	deck.push(makeCard('CROWN', ['Leaves'], 'the END', 'crown_leaves.png',12));
 	deck.push(makeCard('CROWN', ['Moons'], 'the HUNTRESS', 'crown_moons.png',12));
@@ -109,6 +94,36 @@ cascades.shuffle = function(deck) {
 	return shuffled;
 };
 
+cascades.deal = function(game) {
+	switch (m.route.param("version")) {
+	case "0":
+		break;
+		
+	case "1":
+		game = cascades.drawReserve(game);
+		break;
+		
+	case "2":
+		game = cascades.drawAces(game);
+		break;
+	}
+	return game;
+};
+
+cascades.Game = function() {
+	var game = {
+		deck: cascades.shuffle(cascades.Deck()),
+		waste: [],
+		foundation: [[],[],[]],
+		reserve: [[],[],[]],
+		aces: [[],[],[]],
+		round: 1,
+		message: ""
+	};
+	game = cascades.deal(game);
+	return game;
+};
+
 cascades.nextFoundation = function(rankCard, foundation) {
 	//Determine what the next foundation for that rank should be.
 	var rank = rankCard.rank();
@@ -132,213 +147,296 @@ cascades.findOne = function (haystack, arr) {
 	});
 };
 
-cascades.suitChecker = function(suitCard, row) {
+cascades.suitChecker = function(suitCard, row, aceReserve) {
 	//Degenerate case (adding to an empty foundation).
-	if (row.length == 0)
+	var aces = m.route.param("version") == "2";
+	if (!aces && row.length == 0)
 		return true;
 	//Normal case.
 	var cardSuits = suitCard.suits();
-	var rowSuits = row[row.length - 1].suits();
+	var rowSuits = (aces ? aceReserve.map(function(cardObj,idx) { return cardObj.suits()[0]; }, []) : row[row.length - 1].suits());
 	return cascades.findOne(cardSuits, rowSuits);
 };
 
+//row template
+cascades.rows = function(cardArray, classStub, shift) {
+	return m("div", {className: classStub + "Wrapper"},
+	         [0,1,2].map(function(val,idx) {
+		         return m("div", {className: classStub}, [
+			         m("img", {className: "card", src: "cards/blank.png"}),
+			         cardArray[val].map(function(card,index) {
+				         return m("img", {className: "card", src: "cards/" + card.image(), style: shift ? "left: " + index * 20 + "px": ""});
+			         })
+		         ]);
+	         }));
+};
+
+cascades.drawAces = function(game) {
+	[0,1,2].map(function(val,idx) {
+		[0,1].map(function(val2,idx2) {
+			var pos = game.deck.map(function(c) { return c.rank(); }).indexOf('Ace');
+			game.reserve[val].push(game.deck.splice(pos,1)[0]);
+		});
+	});
+	return game;
+};
+
+cascades.drawReserve = function(game) {
+	[0,1,2].map(function(val,idx) {
+		[0,1,2].map(function(val2,idx2) {
+			game.reserve[val].push(game.deck.pop());
+		});
+	});
+	return game;
+};
+
+cascades.draw = function(game) {
+	if (game.deck.length > 0) {
+		game.waste.push(game.deck.pop());
+		game.message = "";
+	} else {
+		game.message = "Dealt last stock card.";
+	}
+	return game;
+};
+
+cascades.turn = function(game) {
+	for (var i = 0; i < 3; i++) {
+		game = cascades.draw(game);
+	}
+	if (game.deck.length == 0) 
+		game.round++;
+	if (game.round > 3)
+		game.message += " No more rounds.";
+	return game;
+}
+
+cascades.play = function(game) {
+	//Play a card from the waste or reserve(s) to the appropriate foundation row.
+	if (game.waste.length > 0) {
+		var playCard = game.waste[game.waste.length - 1];
+		var found = cascades.nextFoundation(playCard,game.foundation);
+		var playRow = game.foundation[found];
+		var aceReserve = game.reserve[found];
+		if (cascades.suitChecker(playCard,playRow,aceReserve)) {
+			game.foundation[found].push(game.waste.pop());
+			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
+		} else
+			game.message = "Suits do not match row " + (found + 1) + ".";
+	}
+	return game;
+};
+
+cascades.playReserve = function(game,row) {
+	//Play a card from the waste or reserve(s) to the appropriate foundation row.
+	if (game.reserve[row].length > 0) {
+		var playCard = game.reserve[row][game.reserve[row].length - 1];
+		var found = cascades.nextFoundation(playCard,game.foundation);
+		var playRow = game.foundation[found];
+		if (cascades.suitChecker(playCard,playRow)) {
+			game.foundation[found].push(game.reserve[row].pop());
+			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
+		} else
+			game.message = "Suits do not match row " + (found + 1) + ".";
+	}
+	return game;
+};
+
+cascades.redeal = function(game) {
+	//The end of round flippy thing.
+	if (game.round > 3)
+		game.message = "No more rounds.";
+	else {
+		while (game.waste.length > 0) {
+			game.deck.push(game.waste.pop());
+			game.message = "Redealt.";
+		}
+	}
+	return game;
+};
+
+//modal module
+var modal = {
+	visible: m.prop(false),
+	view: function(body) {
+		return modal.visible() ? m("div.modal", body()) : "";
+	}
+};
+
+//The variants module.
+var variants = {};
+
+variants.Version = function(data) {
+	this.id = m.prop(data.id);
+	this.title = m.prop(data.title);
+	this.description = m.prop(data.description);
+	this.rules = m.prop(data.rules);
+};
+
+variants.VersionList = function() {
+	var list = [];
+	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	list.push(makeVersion(1, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	list.push(makeVersion(2, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must match at least one of the suits of the two aces next to that foundation row."));
+	return list;
+
+	function makeVersion(id, title, description, rules) {
+		return new variants.Version({
+			id: id,
+			title: title,
+			description: description,
+			rules: m("div", [
+				m("h2", "Rules"),
+				cascades.Rules(),
+				m("p", " For this version (" + title + "), " + rules),
+				m("button[type=button]", {onclick: modal.visible.bind(this, false)}, "Close")
+			])
+		});
+	}
+};
+
+variants.Extended = function(data) {
+	this.id = m.prop(data.id);
+	this.title = m.prop(data.title);
+	this.description = m.prop(data.description);
+};
+
+variants.ExtendedDeck = function() {
+	var list = [];
+	list.push(makeExtended("none","Base deck.","Don't use the extended deck."));
+	list.push(makeExtended("pawns","Pawns only","Include the Pawns from the extended deck."));
+	list.push(makeExtended("both","Pawns and Crowns.","Include both Pawns and Crowns from the extended deck."));
+	list.push(makeExtended("crowns","Crowns only.","Include the Pawns from the extended deck."));
+	return list;
+	
+	function makeExtended(id, title, description) {
+		return new variants.Extended({
+			id: id,
+			title: title,
+			description: description
+		});
+	}	
+}
 
 //controller
+variants.controller = function() {
 
-cascades.controller = function() {
-
-	this.deck = cascades.shuffle(cascades.Deck());
-	this.foundation = [[],[],[]];
-	this.reserve = [[],[],[]];
-	this.waste = [];
-	this.message = "";
-	this.rules = "";
-	this.round = 1;
-	this.versions = cascades.VersionList();
-	this.version = 0;
+	this.game = cascades.Game();
+	this.versions = variants.VersionList();
+	this.extended = variants.ExtendedDeck();
 	
 	this.reset = function() {
-		this.deck = cascades.shuffle(cascades.Deck());
-		this.foundation = [[],[],[]];
-		this.reserve = [[],[],[]];
-		this.waste = [];
-		this.message = "";
-		this.rules = "";
-		this.round = 1;
-		this.versions = cascades.VersionList();
+		this.game = cascades.Game();
 	};
-
-	this.toggleRules = function() {
-		this.rules = this.rules ? "" : this.versions[this.version].rules();
-	};
-
-	this.changeVersion = function(newVersion) {
-		this.version = newVersion;
-		this.reset();
-		this.drawReserve(newVersion);
-	};
-
+	
 	this.draw = function() {
-		if (this.deck.length > 0) {
-			this.waste.push(this.deck.pop());
-			this.message = "";
+		if (this.game.deck.length > 0) {
+			this.game.waste.push(this.game.deck.pop());
+			this.game.message = "";
 		} else {
-			this.message = "Dealt last stock card.";
+			this.game.message = "Dealt last stock card.";
 		}
-	};
-
-	this.drawReserve = function(version) {
-		switch (version) {
-			case 0:
-			break;
-
-			case 1: 
-			break;
-			
-			case 2:
-			[0,1,2].map(function(val,idx) {
-				[0,1,2].map(function(val2,idx2) {
-					this.reserve[val].push(this.deck.pop());
-				});
-			});
-		}
-		return;
 	};
 	
 	this.turn = function() {
-		for (var i = 0; i < 3; i++) {
-			this.draw();
-		}
-		if (this.deck.length == 0) 
-			this.round++;
-		if (this.round > 3)
-			this.message += " No more rounds.";
+		this.game = cascades.turn(this.game);
 	};
 
 	this.play = function() {
-		//Play a card from the waste or reserve(s) to the appropriate foundation row.
-		if (this.waste.length > 0) {
-			var playCard = this.waste[this.waste.length - 1];
-			var found = cascades.nextFoundation(playCard,this.foundation);
-			var playRow = this.foundation[found];
-			if (cascades.suitChecker(playCard,playRow)) {
-				this.foundation[found].push(this.waste.pop());
-				this.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
-			} else
-				this.message = "Suits do not match row " + (found + 1) + ".";
-		}
+		this.game = cascades.play(this.game);
+	};
+
+	this.playReserve = function(row) {
+		this.game = cascades.playReserve(this.game,row);
 	};
 
 	this.redeal = function() {
-		//The end of round flippy thing.
-		if (this.round > 3)
-			this.message = "No more rounds.";
-		else {
-			while (this.waste.length > 0) {
-				this.deck.push(this.waste.pop());
-				this.message = "Redealt.";
-			}
-		}
+		this.game = cascades.redeal(this.game);
 	};
 };
 
 //view
 
-cascades.view = function(ctrl) {
+variants.view = function(ctrl) {
 
 	return m("body", [
 
 		m("header", [
 			m("h1", "Cascades"),
 			m("div", {className: "buttonWrapper"}, [
-				m("button", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
-				m("button", {onclick: ctrl.toggleRules.bind(ctrl)}, "Rules")
+				m("button[type=button]", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
+				m("button[type=button]", {onclick: modal.visible.bind(ctrl, true)}, "Rules")
 			]),
-			m("div", {className: "rules"}, [
-				m("p", "a solitaire card game for the Decktet by Joe Conard"),
-				m("p", ctrl.rules)
+			m("div", [
+				m("p", {className: "description"}, "a solitaire card game for the Decktet by Joe Conard")
 			])
 		]),
 		m("main", [
 			m("div", {className: "leftColumn"}, [
 				m("div", {className: "versionWrapper"}, [
 					m("b", "Version: "),
-					m('select', { onchange : function() { ctrl.changeVersion(this.value); }}, [
+					m('select', { onchange : function() { m.route("version" + this.value + "/" + m.route.param("extended")); }}, [
 						ctrl.versions.map(function(v, i) {
-							return m('option', { value : v.id(), innerHTML : v.title() });
+							if (v.id() == m.route.param("version"))
+								return m('option', { value: v.id(), innerHTML: v.title(), selected: "selected" });
+							else
+								return m('option', { value: v.id(), innerHTML: v.title() });
 						})
 					]),
-					m("p", ctrl.versions[ctrl.version].description())
+					m("p", ctrl.versions[m.route.param("version")].description()),
 				]),
+				m("div", {className: "versionWrapper"}, [
+					m("b", "Extended deck: "),
+					m('select', { onchange : function() {m.route("version" + m.route.param("version") + "/" + this.value); }}, [
+						ctrl.extended.map(function(e, i) {
+							if (e.id() == m.route.param("extended"))
+								return m('option', { value: e.id(), innerHTML: e.title(), selected: "selected" });
+							else
+								return m('option', { value: e.id(), innerHTML: e.title() });
+						})
+					]),
+					m("p", ctrl.extended.filter(function(e) {return e.id() === m.route.param("extended"); })[0].description())
+				]),
+				m("div", {className: "message"}, ctrl.game.message),
 				// Stock and waste.
-				m("h2", "Round " + Math.min(ctrl.round,3)),
+				m("h2", "Round " + Math.min(ctrl.game.round,3)),
 				m("div", {className: "deckWrapper"}, [
 					m("div", {className: "stock"}, [
-						m("h2","Stock (" + ctrl.deck.length + ")"),
-						m("img", {onclick: (ctrl.deck.length > 0 ? ctrl.turn.bind(ctrl) : ctrl.redeal.bind(ctrl)), className: "card", src: "cards/" + (ctrl.deck.length > 0 ? "back.png" : "blank.png")})
+						m("h3","Stock (" + ctrl.game.deck.length + ")"),
+						m("img", {onclick: (ctrl.game.deck.length > 0 ? ctrl.turn.bind(ctrl) : ctrl.redeal.bind(ctrl)), className: "card", src: "cards/" + (ctrl.game.deck.length > 0 ? "back.png" : "blank.png")})
 					]),
 					m("div", {className: "waste"}, [
-						m("h2","Waste (" + ctrl.waste.length + ")"),
-						m("img", {className: "card", src: "cards/" + (ctrl.waste.length > 0 ? ctrl.waste[ctrl.waste.length - 1].image() : "blank.png"), onclick: ctrl.play.bind(ctrl)})
+						m("h3","Waste (" + ctrl.game.waste.length + ")"),
+						m("img", {className: "card", src: "cards/" + (ctrl.game.waste.length > 0 ? ctrl.game.waste[ctrl.game.waste.length - 1].image() : "blank.png"), onclick: ctrl.play.bind(ctrl)})
 					])
-				]),
-				m("div", {className: "message"}, ctrl.message)
+				])
 			]),
-			
+
 			// Reserve
-			m("div", {className: "reserveWrapper"}, [
-				m("div", [
-					m("div", {className: "reserve"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),
-						ctrl.reserve[0].map(function(card,index) {
-							return m("img", {className: "card", src: "cards/" + card.image()});
-						})
-					]),
-					m("div", {className: "reserve"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),
-						ctrl.reserve[1].map(function(card,index) {
-							return m("img", {className: "card", src: "cards/" + card.image()});
-						})
-					]),
-					m("div", {className: "reserve"}, [			
-						m("img", {className: "card", src: "cards/blank.png"}),	
-						ctrl.reserve[2].map(function(card,index) {
-							return m("img", {className: "card", src: "cards/" + card.image()});
-						})
-					])
-				])
-			]),
-			// foundation
-			m("div", {className: "foundationWrapper"}, [
-				m("div", [
-					m("div", {className: "foundation"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),		
-						ctrl.foundation[0].map(function(card,index) {
-							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-						})
-					]),
-					m("div", {className: "foundation"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),
-						ctrl.foundation[1].map(function(card,index) {
-							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-						})
-					]),
-					m("div", {className: "foundation"}, [
-						m("img", {className: "card", src: "cards/blank.png"}),
-						ctrl.foundation[2].map(function(card,index) {
-							return m("img", {className: "card", style: "left: " + index * 20 + "px", src: "cards/" + card.image()});
-						})
-					])
-				])
-			])
-		])
+			m("div", {className:  "reserveWrapper"},
+	      [0,1,2].map(function(row,idx) {
+		      return m("div", {className: "reserve"}, [
+			      m("img", {className: "card", src: "cards/blank.png"}),
+			      ctrl.game.reserve[row].map(function(card,index) {
+				      return m("img", {className: "card", src: "cards/" + (m.route.param("version") == "1" && (row + 1 >= ctrl.game.round) ? "back.png" : card.image()), style: m.route.param("version") == "2" ? "left: " + index * 20 + "px": "", onclick: (m.route.param("version") == "1" && (row + 1 < ctrl.game.round) ? ctrl.playReserve.bind(ctrl,row) : "" )});
+			      })
+		      ]);
+	      })
+			 ),
+			
+			// Foundation
+			cascades.rows(ctrl.game.foundation, "foundation", true)
+		]),
+		modal.view(function() {
+			return m("div", ctrl.versions[m.route.param("version")].rules());
+		})
 	]);
 };
 
-cascades.init = function() {
-	m.mount(document.getElementById("game"),cascades);
-};
+//setup routes to start w/ the `#` symbol
+m.route.mode = "hash";
 
-// start the app
-cascades.init();
-
+//define the routes
+m.route(document.body, "version1/both", {
+	"version:version/:extended": variants
+});
