@@ -20,6 +20,7 @@ cascades.Rules = function() {
 
 cascades.Deck = function() {
 	deck = [];
+	if (m.route.param("extended") != "distended") {
 	deck.push(makeCard('Ace', ['Knots'], 'Ace of Knots', '1_ace_knots.png',1));
 	deck.push(makeCard('Ace', ['Leaves'], 'Ace of Leaves', '1_ace_leaves.png',1));
 	deck.push(makeCard('Ace', ['Moons'], 'Ace of Moons', '1_ace_moons.png',1));
@@ -35,6 +36,7 @@ cascades.Deck = function() {
 	deck.push(makeCard('4', ['Wyrms', 'Knots'], 'the BATTLE', '4_battle.png',4));
 	deck.push(makeCard('4', ['Moons', 'Suns'], 'the MOUNTAIN', '4_mountain.png',4));
 	deck.push(makeCard('4', ['Waves', 'Leaves'], 'the SAILOR', '4_sailor.png',4));
+	}
 	deck.push(makeCard('5', ['Suns', 'Waves'], 'the DISCOVERY', '5_discovery.png',5));
 	deck.push(makeCard('5', ['Moons', 'Leaves'], 'the FOREST', '5_forest.png',5));
 	deck.push(makeCard('5', ['Wyrms', 'Knots'], 'the SOLDIER', '5_soldier.png',5));
@@ -62,12 +64,14 @@ cascades.Deck = function() {
 		deck.push(makeCard('COURT', ['Moons', 'Leaves', 'Wyrms'], 'the RITE', '11_court_rite.png',11));
 		deck.push(makeCard('COURT', ['Suns', 'Leaves', 'Knots'], 'the WINDOW', '11_court_window.png',11));
 	}
+	if (m.route.param("extended") != "distended") {
 	deck.push(makeCard('CROWN', ['Knots'], 'the WINDFALL', 'crown_knots.png',12));
 	deck.push(makeCard('CROWN', ['Leaves'], 'the END', 'crown_leaves.png',12));
 	deck.push(makeCard('CROWN', ['Moons'], 'the HUNTRESS', 'crown_moons.png',12));
 	deck.push(makeCard('CROWN', ['Suns'], 'the BARD', 'crown_suns.png',12));
 	deck.push(makeCard('CROWN', ['Waves'], 'the SEA', 'crown_waves.png',12));
 	deck.push(makeCard('CROWN', ['Wyrms'], 'the CALAMITY', 'crown_wyrms.png',12));
+	}
 	//	deck.push(makeCard('', [], 'the EXCUSE', 'excuse.png', 0));
 	return deck;
 	
@@ -95,15 +99,15 @@ cascades.shuffle = function(deck) {
 };
 
 cascades.deal = function(game) {
-	switch (m.route.param("version")) {
-	case "0":
+	switch (game.reserveType) {
+	case "none":
 		break;
 		
-	case "1":
+	case "reserve":
 		game = cascades.drawReserve(game);
 		break;
 		
-	case "2":
+	case "aces":
 		game = cascades.drawAces(game);
 		break;
 	}
@@ -116,7 +120,7 @@ cascades.Game = function() {
 		waste: [],
 		foundation: [[],[],[]],
 		reserve: [[],[],[]],
-		aces: [[],[],[]],
+		reserveType: m.route.param("reserved"),
 		round: 1,
 		message: ""
 	};
@@ -149,7 +153,7 @@ cascades.findOne = function (haystack, arr) {
 
 cascades.suitChecker = function(suitCard, row, aceReserve) {
 	//Degenerate case (adding to an empty foundation).
-	var aces = m.route.param("version") == "2";
+	var aces = m.route.param("reserved") == "aces";
 	if (!aces && row.length == 0)
 		return true;
 	//Normal case.
@@ -221,6 +225,7 @@ cascades.play = function(game) {
 		if (cascades.suitChecker(playCard,playRow,aceReserve)) {
 			game.foundation[found].push(game.waste.pop());
 			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
+			game = cascades.won(game);
 		} else
 			game.message = "Suits do not match row " + (found + 1) + ".";
 	}
@@ -236,6 +241,7 @@ cascades.playReserve = function(game,row) {
 		if (cascades.suitChecker(playCard,playRow)) {
 			game.foundation[found].push(game.reserve[row].pop());
 			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
+			game = cascades.won(game, true);
 		} else
 			game.message = "Suits do not match row " + (found + 1) + ".";
 	}
@@ -255,6 +261,24 @@ cascades.redeal = function(game) {
 	return game;
 };
 
+cascades.won = function(game, withReserve) {
+	//Evaluate the game state for a victory.
+	var victory;
+	if (typeof withReserve == "undefined")
+		withReserve = (m.route.param("reserved") == "reserve");
+	if (game.waste.length > 0 || game.deck.length > 0 )
+		victory = false;
+	else if (!withReserve)
+		victory = true;
+	else if (game.reserve[0].length > 0 && game.reserve[1].length > 0 && game.reserve[2].length > 0)
+		victory = false;
+	else
+		victory = true;
+	if (victory)
+		game.message = "Victory!";
+	return game;
+}
+
 //modal module
 var modal = {
 	visible: m.prop(false),
@@ -267,7 +291,7 @@ var modal = {
 var variants = {};
 
 variants.Version = function(data) {
-	this.id = m.prop(data.id);
+	this.type = m.prop(data.type);
 	this.title = m.prop(data.title);
 	this.description = m.prop(data.description);
 	this.rules = m.prop(data.rules);
@@ -275,14 +299,14 @@ variants.Version = function(data) {
 
 variants.VersionList = function() {
 	var list = [];
-	list.push(makeVersion(0, "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
-	list.push(makeVersion(1, "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
-	list.push(makeVersion(2, "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must match at least one of the suits of the two aces next to that foundation row."));
+	list.push(makeVersion("none", "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	list.push(makeVersion("reserve", "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	list.push(makeVersion("aces", "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must match at least one of the suits of the two aces next to that foundation row."));
 	return list;
 
-	function makeVersion(id, title, description, rules) {
+	function makeVersion(type, title, description, rules) {
 		return new variants.Version({
-			id: id,
+			type: type,
 			title: title,
 			description: description,
 			rules: m("div", [
@@ -303,10 +327,11 @@ variants.Extended = function(data) {
 
 variants.ExtendedDeck = function() {
 	var list = [];
-	list.push(makeExtended("none","Base deck.","Don't use the extended deck."));
+	list.push(makeExtended("none","Base deck","Don't use the extended deck."));
 	list.push(makeExtended("pawns","Pawns only","Include the Pawns from the extended deck."));
-	list.push(makeExtended("both","Pawns and Crowns.","Include both Pawns and Crowns from the extended deck."));
-	list.push(makeExtended("crowns","Crowns only.","Include the Pawns from the extended deck."));
+	list.push(makeExtended("both","Pawns and Crowns","Include both Pawns and Crowns from the extended deck."));
+	list.push(makeExtended("crowns","Crowns only","Include the Pawns from the extended deck."));
+	//list.push(makeExtended("distended","Test deck","Include the extended deck but reduce the size of the base deck."));
 	return list;
 	
 	function makeExtended(id, title, description) {
@@ -375,19 +400,19 @@ variants.view = function(ctrl) {
 			m("div", {className: "leftColumn"}, [
 				m("div", {className: "versionWrapper"}, [
 					m("b", "Version: "),
-					m('select', { onchange : function() { m.route("version" + this.value + "/" + m.route.param("extended")); }}, [
+					m('select', { onchange : function() { m.route(this.value + "/" + m.route.param("extended")); }}, [
 						ctrl.versions.map(function(v, i) {
-							if (v.id() == m.route.param("version"))
-								return m('option', { value: v.id(), innerHTML: v.title(), selected: "selected" });
+							if (v.type() == m.route.param("reserved"))
+								return m('option', { value: v.type(), innerHTML: v.title(), selected: "selected" });
 							else
-								return m('option', { value: v.id(), innerHTML: v.title() });
+								return m('option', { value: v.type(), innerHTML: v.title() });
 						})
 					]),
-					m("p", ctrl.versions[m.route.param("version")].description()),
+					m("p", ctrl.versions.filter(function(v) {return v.type() == m.route.param("reserved"); })[0].description()),
 				]),
 				m("div", {className: "versionWrapper"}, [
 					m("b", "Extended deck: "),
-					m('select', { onchange : function() {m.route("version" + m.route.param("version") + "/" + this.value); }}, [
+					m('select', { onchange : function() {m.route(m.route.param("reserved") + "/" + this.value); }}, [
 						ctrl.extended.map(function(e, i) {
 							if (e.id() == m.route.param("extended"))
 								return m('option', { value: e.id(), innerHTML: e.title(), selected: "selected" });
@@ -418,7 +443,7 @@ variants.view = function(ctrl) {
 		      return m("div", {className: "reserve"}, [
 			      m("img", {className: "card", src: "cards/blank.png"}),
 			      ctrl.game.reserve[row].map(function(card,index) {
-				      return m("img", {className: "card", src: "cards/" + (m.route.param("version") == "1" && (row + 1 >= ctrl.game.round) ? "back.png" : card.image()), style: m.route.param("version") == "2" ? "left: " + index * 20 + "px": "", onclick: (m.route.param("version") == "1" && (row + 1 < ctrl.game.round) ? ctrl.playReserve.bind(ctrl,row) : "" )});
+				      return m("img", {className: "card", src: "cards/" + (m.route.param("reserved") == "reserve" && (row + 1 >= ctrl.game.round) ? "back.png" : card.image()), style: m.route.param("reserved") == "aces" ? "left: " + index * 20 + "px": "", onclick: (m.route.param("reserved") == "reserve" && (row + 1 < ctrl.game.round) ? ctrl.playReserve.bind(ctrl,row) : "" )});
 			      })
 		      ]);
 	      })
@@ -428,7 +453,7 @@ variants.view = function(ctrl) {
 			cascades.rows(ctrl.game.foundation, "foundation", true)
 		]),
 		modal.view(function() {
-			return m("div", ctrl.versions[m.route.param("version")].rules());
+			return m("div", ctrl.versions.filter(function(v) {return v.type() == m.route.param("reserved"); })[0].rules());
 		})
 	]);
 };
@@ -437,6 +462,6 @@ variants.view = function(ctrl) {
 m.route.mode = "hash";
 
 //define the routes
-m.route(document.body, "version1/both", {
-	"version:version/:extended": variants
+m.route(document.body, "reserve/both", {
+	":reserved/:extended": variants
 });
