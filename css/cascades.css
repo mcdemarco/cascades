@@ -20,9 +20,6 @@ body {
     display: flex;
     min-height: 100vh;
     flex-direction: column;
-}
-
-body {
     padding:0 0 0 .66em;
 }
 
@@ -33,6 +30,7 @@ header {
     -webkit-align-items: center;
     align-items: center;
 }
+
 main {
     display: -webkit-flex;
     display: flex;
@@ -42,6 +40,17 @@ header h1 {
     -webkit-flex: 0 0 300px;
     flex: 0 0 300px;
 }
+header p.description {
+    white-space:nowrap;
+}
+
+header div.buttonWrapper {
+    -webkit-flex: 0 0 175px;
+    flex: 0 0 175px;
+    text-align:center;
+}
+
+/* the left column of main contains .versionWrapper, .roundWrapper, and .deckWrapper */
 div.leftColumn {
     -webkit-flex: 0 0 300px;
     flex: 0 0 300px;
@@ -50,32 +59,46 @@ div.leftColumn {
     justify-content: space-between;
 }
 
-header div.buttonWrapper {
-    -webkit-flex: 0 0 175px;
-    flex: 0 0 175px;
-    text-align:center;
-}
 .reserveWrapper {
     text-align:center;
     -webkit-flex: 0 0 175px;
     flex: 0 0 175px;
 }
 
-p.description {
-    white-space:nowrap;
-}
 /* .foundationWrapper is the third column in main */
 
-.deckWrapper {
+.versionWrapper, .deckWrapper, .roundWrapper {
     display: -webkit-flex;
     display: flex;
+}
+.versionWrapper {
+    flex-direction: column;
+}
+.versionWrapper div {
+    flex-direction: row;
+}
+.roundWrapper {
+    flex-direction: column;
+    flex: 0 0 60px;
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+}
+.deckWrapper {
     -webkit-justify-content: center;
     justify-content: center;
 }
 
+.roundWrapper .message {
+    text-align:center;
+    min-height:20px;
+}
+
+/* inside deckWrapper */
 div.stock, div.waste {
     margin: 5px;
 }
+
+/* the popup rules */
 
 div.modal {
     position: fixed;
@@ -95,10 +118,8 @@ div.modal {
 div.modal p {
     text-align: justify;
 }
+/* there is also a div.rules inside the modal */
 
-div.rules {
-
-}
 
 /* font and color */
 
@@ -134,8 +155,6 @@ button {
 
 div.message {
     color: coral;
-    text-align:center;
-    min-height: 20px;
 }
 
 div.versionWrapper p, p.description {
