@@ -320,7 +320,7 @@ variants.VersionList = function() {
 };
 
 variants.Extended = function(data) {
-	this.id = m.prop(data.id);
+	this.type = m.prop(data.type);
 	this.title = m.prop(data.title);
 	this.description = m.prop(data.description);
 };
@@ -334,9 +334,9 @@ variants.ExtendedDeck = function() {
 	//list.push(makeExtended("distended","Test deck","Include the extended deck but reduce the size of the base deck."));
 	return list;
 	
-	function makeExtended(id, title, description) {
+	function makeExtended(type, title, description) {
 		return new variants.Extended({
-			id: id,
+			type: type,
 			title: title,
 			description: description
 		});
@@ -414,13 +414,13 @@ variants.view = function(ctrl) {
 					m("b", "Extended deck: "),
 					m('select', { onchange : function() {m.route(m.route.param("reserved") + "/" + this.value); }}, [
 						ctrl.extended.map(function(e, i) {
-							if (e.id() == m.route.param("extended"))
-								return m('option', { value: e.id(), innerHTML: e.title(), selected: "selected" });
+							if (e.type() == m.route.param("extended"))
+								return m('option', { value: e.type(), innerHTML: e.title(), selected: "selected" });
 							else
-								return m('option', { value: e.id(), innerHTML: e.title() });
+								return m('option', { value: e.type(), innerHTML: e.title() });
 						})
 					]),
-					m("p", ctrl.extended.filter(function(e) {return e.id() === m.route.param("extended"); })[0].description())
+					m("p", ctrl.extended.filter(function(e) {return e.type() == m.route.param("extended"); })[0].description())
 				]),
 				m("div", {className: "message"}, ctrl.game.message),
 				// Stock and waste.
