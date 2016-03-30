@@ -20,7 +20,6 @@ body {
     display: flex;
     min-height: 100vh;
     flex-direction: column;
-    padding:0 0 0 .66em;
 }
 
 header {
@@ -42,12 +41,11 @@ header h1 {
 }
 header p.description {
     white-space:nowrap;
+    padding-left:10%;
 }
 
 header div.buttonWrapper {
-    -webkit-flex: 0 0 175px;
-    flex: 0 0 175px;
-    text-align:center;
+    text-align:left;
 }
 
 /* the left column of main contains .versionWrapper, .roundWrapper, and .deckWrapper */
@@ -57,6 +55,7 @@ div.leftColumn {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    margin-left: 1em;
 }
 
 .reserveWrapper {
@@ -102,9 +101,9 @@ div.stock, div.waste {
 
 div.modal {
     position: fixed;
-    top: 20%;
-    right: 10%;
-    width:40%;
+    top: 15%;
+    right: 5%;
+    width:50%;
     min-width:300px;
     padding: 10px;
     border: 2px solid darkslategray;
@@ -203,3 +202,17 @@ div.foundation {
 }
 
 
+/* mobile */
+
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+p, input, textarea {
+ -webkit-user-select: text;
+ -moz-user-select: text;
+ -ms-user-select: text;
+ user-select: text;
+}
