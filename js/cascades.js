@@ -399,32 +399,36 @@ variants.view = function(ctrl) {
 		m("main", [
 			m("div", {className: "leftColumn"}, [
 				m("div", {className: "versionWrapper"}, [
-					m("b", "Version: "),
-					m('select', { onchange : function() { m.route(this.value + "/" + m.route.param("extended")); }}, [
-						ctrl.versions.map(function(v, i) {
-							if (v.type() == m.route.param("reserved"))
-								return m('option', { value: v.type(), innerHTML: v.title(), selected: "selected" });
-							else
-								return m('option', { value: v.type(), innerHTML: v.title() });
-						})
+					m("div", [
+						m("b", "Version: "),
+						m('select', { onchange : function() { m.route(this.value + "/" + m.route.param("extended")); }}, [
+							ctrl.versions.map(function(v, i) {
+								if (v.type() == m.route.param("reserved"))
+									return m('option', { value: v.type(), innerHTML: v.title(), selected: "selected" });
+								else
+									return m('option', { value: v.type(), innerHTML: v.title() });
+							})
+						])
 					]),
 					m("p", ctrl.versions.filter(function(v) {return v.type() == m.route.param("reserved"); })[0].description()),
-				]),
-				m("div", {className: "versionWrapper"}, [
-					m("b", "Extended deck: "),
-					m('select', { onchange : function() {m.route(m.route.param("reserved") + "/" + this.value); }}, [
-						ctrl.extended.map(function(e, i) {
-							if (e.type() == m.route.param("extended"))
-								return m('option', { value: e.type(), innerHTML: e.title(), selected: "selected" });
-							else
-								return m('option', { value: e.type(), innerHTML: e.title() });
-						})
+					m("div", [
+						m("b", "Extended deck: "),
+						m('select', { onchange : function() {m.route(m.route.param("reserved") + "/" + this.value); }}, [
+							ctrl.extended.map(function(e, i) {
+								if (e.type() == m.route.param("extended"))
+									return m('option', { value: e.type(), innerHTML: e.title(), selected: "selected" });
+								else
+									return m('option', { value: e.type(), innerHTML: e.title() });
+							})
+						])
 					]),
 					m("p", ctrl.extended.filter(function(e) {return e.type() == m.route.param("extended"); })[0].description())
 				]),
-				m("div", {className: "message"}, ctrl.game.message),
+				m("div", {className: "roundWrapper"}, [
+					m("h2", "Round " + Math.min(ctrl.game.round,3)),
+					m("div", {className: "message"}, ctrl.game.message)
+				]),
 				// Stock and waste.
-				m("h2", "Round " + Math.min(ctrl.game.round,3)),
 				m("div", {className: "deckWrapper"}, [
 					m("div", {className: "stock"}, [
 						m("h3","Stock (" + ctrl.game.deck.length + ")"),
