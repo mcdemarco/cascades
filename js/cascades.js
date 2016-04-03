@@ -241,7 +241,7 @@ cascades.playReserve = function(game,row) {
 		if (cascades.suitChecker(playCard,playRow)) {
 			game.foundation[found].push(game.reserve[row].pop());
 			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
-			game = cascades.won(game, true);
+			game = cascades.won(game);
 		} else
 			game.message = "Suits do not match row " + (found + 1) + ".";
 	}
@@ -261,16 +261,12 @@ cascades.redeal = function(game) {
 	return game;
 };
 
-cascades.won = function(game, withReserve) {
+cascades.won = function(game) {
 	//Evaluate the game state for a victory.
 	var victory;
-	if (typeof withReserve == "undefined")
-		withReserve = (m.route.param("reserved") == "reserve");
 	if (game.waste.length > 0 || game.deck.length > 0 )
 		victory = false;
-	else if (!withReserve)
-		victory = true;
-	else if (game.reserve[0].length > 0 && game.reserve[1].length > 0 && game.reserve[2].length > 0)
+	else if (game.reserveType == "reserve" && (game.reserve[2].length > 0 || game.reserve[1].length > 0 || game.reserve[0].length > 0))
 		victory = false;
 	else
 		victory = true;
