@@ -384,20 +384,17 @@ variants.controller = function() {
 
 variants.view = function(ctrl) {
 
-	return m("body", [
-
+	return m("div", {className: "bodyWrapper"}, [
 		m("header", [
 			m("h1", "Cascades"),
-			m("div", {className: "buttonWrapper"}, [
-				m("button[type=button]", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
-				m("button[type=button]", {onclick: modal.visible.bind(ctrl, true)}, "Rules")
-			]),
-			m("div", [
-				m("p", {className: "description"}, "a solitaire card game for the Decktet by Joe Conard")
-			])
+			m("p", {className: "description"}, "a solitaire card game for the Decktet by Joe Conard")
 		]),
 		m("main", [
 			m("div", {className: "leftColumn"}, [
+				m("div", {className: "buttonWrapper"}, [
+					m("button[type=button]", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
+					m("button[type=button]", {onclick: modal.visible.bind(ctrl, true)}, "Rules")
+				]),
 				m("div", {className: "versionWrapper"}, [
 					m("div", [
 						m("b", "Version: "),
