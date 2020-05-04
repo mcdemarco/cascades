@@ -9,26 +9,45 @@
 
 /* layout */
 
-html, body {
+html, body, div.bodyWrapper {
+    box-sizing:border-box;
     margin:0;
     height:100%;
     width:100%;
 }
 
-body {
+body, div.bodyWrapper {
+    height: 100vh;
+}
+
+/* an unfortunate mithril necessity */
+div.bodyWrapper {
     display: -webkit-flex;
     display: flex;
-    min-height: 100vh;
+    -webkit-flex-direction: column;
     flex-direction: column;
-    padding:0 0 0 .66em;
 }
 
 header {
     display: -webkit-flex;
     display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
     min-height: 66px;
     -webkit-align-items: center;
     align-items: center;
+    margin-left: 1em;
+}
+
+header h1 {
+    -webkit-flex: 0 0 300px;
+    flex: 0 0 300px;
+}
+
+header p.description {
+    -webkit-flex: 0 auto;
+    flex: 0 auto;
+    white-space:nowrap;
 }
 
 main {
@@ -36,27 +55,19 @@ main {
     display: flex;
 }
 
-header h1 {
-    -webkit-flex: 0 0 300px;
-    flex: 0 0 300px;
-}
-header p.description {
-    white-space:nowrap;
-}
-
-header div.buttonWrapper {
-    -webkit-flex: 0 0 175px;
-    flex: 0 0 175px;
-    text-align:center;
-}
-
 /* the left column of main contains .versionWrapper, .roundWrapper, and .deckWrapper */
 div.leftColumn {
     -webkit-flex: 0 0 300px;
     flex: 0 0 300px;
+    display: -webkit-flex;
     display: flex;
+    -webkit-flex-direction: column;
     flex-direction: column;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
     justify-content: space-between;
+    margin-left: 1em;
+    height: 541px;
 }
 
 .reserveWrapper {
@@ -67,23 +78,21 @@ div.leftColumn {
 
 /* .foundationWrapper is the third column in main */
 
-.versionWrapper, .deckWrapper, .roundWrapper {
+
+.buttonWrapper, .versionWrapper, .deckWrapper, .roundWrapper {
     display: -webkit-flex;
     display: flex;
 }
-.versionWrapper {
+.versionWrapper, .roundWrapper {
+    -webkit-flex-direction: column;
     flex-direction: column;
 }
 .versionWrapper div {
+    -webkit-flex-direction: row;
     flex-direction: row;
 }
-.roundWrapper {
-    flex-direction: column;
-    flex: 0 0 60px;
-    -webkit-justify-content: flex-end;
-    justify-content: flex-end;
-}
-.deckWrapper {
+
+.buttonWrapper, .deckWrapper {
     -webkit-justify-content: center;
     justify-content: center;
 }
@@ -102,9 +111,9 @@ div.stock, div.waste {
 
 div.modal {
     position: fixed;
-    top: 20%;
-    right: 10%;
-    width:40%;
+    top: 15%;
+    right: 5%;
+    width:50%;
     min-width:300px;
     padding: 10px;
     border: 2px solid darkslategray;
@@ -138,7 +147,7 @@ h1, h2, h3 {
     font-family: 'Fortune Letters', Futura, Geneva, sans-serif;
 }
 
-h1, h2, h3, .buttonWrapper {
+h1, h2, h3 {
     text-align:center;
 }
 
@@ -177,7 +186,7 @@ img.card {
     width:124px;
     height:174px;
     border-radius:6px;
-    border:thin solid darkslategray; 
+    border:thin solid darkslategray;
     background-size:124px 174px;
     -webkit-user-select: none;
     user-select: none;
@@ -203,3 +212,17 @@ div.foundation {
 }
 
 
+/* mobile */
+
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+p, input, textarea {
+ -webkit-user-select: text;
+ -moz-user-select: text;
+ -ms-user-select: text;
+ user-select: text;
+}

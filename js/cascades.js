@@ -12,8 +12,8 @@ cascades.Card = function(data) {
 
 cascades.Rules = function() {
 	return m("div", {className: "rules"}, [
-		m("p", "Click on the stock pile to turn over three cards at a time, as in Klondike.  You get three passes (rounds) through the stock pile; when the stock is empty, click on the empty space to redeal."),
-		m("p", "Click on the waste pile to move a face-up card to the appropriate foundation row.  Ranks are moved to the rows in order, so the card can move to at most one of the rows.  For example, a six cannot appear in the third row until one has been placed in the second row.  For those ranks that appear in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows."),
+		m("p", "Click on the stock pile to turn over three cards at a time, as in Klondike.  When the stock is empty, click on the empty space to flip the waste over (redeal).  You get three passes (rounds) through the stock pile."),
+		m("p", "Click on the waste pile to move a face-up card to the appropriate foundation row, if desired.  (A card can be moved to at most one of the rows at any particular time.)  Ranks can appear only once in a row and must start at the first row.  For example, a six cannot be placed in the third row until one has been placed in the second row.  For those unranked cards that occur in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows."),
 		m("p", "Rank order does not matter within a row, but a suit from the new card must match the row.")
 	]);
 };
@@ -241,7 +241,7 @@ cascades.playReserve = function(game,row) {
 		if (cascades.suitChecker(playCard,playRow)) {
 			game.foundation[found].push(game.reserve[row].pop());
 			game.message = "Played " + playCard.name() + " to row " + (found + 1) + ".";
-			game = cascades.won(game, true);
+			game = cascades.won(game);
 		} else
 			game.message = "Suits do not match row " + (found + 1) + ".";
 	}
@@ -261,16 +261,12 @@ cascades.redeal = function(game) {
 	return game;
 };
 
-cascades.won = function(game, withReserve) {
+cascades.won = function(game) {
 	//Evaluate the game state for a victory.
 	var victory;
-	if (typeof withReserve == "undefined")
-		withReserve = (m.route.param("reserved") == "reserve");
 	if (game.waste.length > 0 || game.deck.length > 0 )
 		victory = false;
-	else if (!withReserve)
-		victory = true;
-	else if (game.reserve[0].length > 0 && game.reserve[1].length > 0 && game.reserve[2].length > 0)
+	else if (game.reserveType == "reserve" && (game.reserve[2].length > 0 || game.reserve[1].length > 0 || game.reserve[0].length > 0))
 		victory = false;
 	else
 		victory = true;
@@ -301,7 +297,7 @@ variants.VersionList = function() {
 	var list = [];
 	list.push(makeVersion("none", "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
 	list.push(makeVersion("reserve", "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
-	list.push(makeVersion("aces", "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "the suit(s) of a card must match at least one of the suits of the two aces next to that foundation row."));
+	list.push(makeVersion("aces", "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "at least one suit must be shared between the new card and the suits of the two aces next to that foundation row."));
 	return list;
 
 	function makeVersion(type, title, description, rules) {
@@ -384,20 +380,17 @@ variants.controller = function() {
 
 variants.view = function(ctrl) {
 
-	return m("body", [
-
+	return m("div", {className: "bodyWrapper"}, [
 		m("header", [
 			m("h1", "Cascades"),
-			m("div", {className: "buttonWrapper"}, [
-				m("button[type=button]", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
-				m("button[type=button]", {onclick: modal.visible.bind(ctrl, true)}, "Rules")
-			]),
-			m("div", [
-				m("p", {className: "description"}, "a solitaire card game for the Decktet by Joe Conard")
-			])
+			m("p", {className: "description"}, "a solitaire card game for the Decktet by Joe Conard")
 		]),
 		m("main", [
 			m("div", {className: "leftColumn"}, [
+				m("div", {className: "buttonWrapper"}, [
+					m("button[type=button]", {onclick: ctrl.reset.bind(ctrl)}, "Restart"),
+					m("button[type=button]", {onclick: modal.visible.bind(ctrl, true)}, "Rules")
+				]),
 				m("div", {className: "versionWrapper"}, [
 					m("div", [
 						m("b", "Version: "),
