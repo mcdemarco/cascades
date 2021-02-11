@@ -18,10 +18,14 @@ html, body, div.bodyWrapper {
 
 body, div.bodyWrapper {
     height: 100vh;
+    min-height: 625px;
+    min-width: 1000px;
 }
 
 /* an unfortunate mithril necessity */
 div.bodyWrapper {
+    height: 625px;
+    width: 1000px;
     display: -webkit-flex;
     display: flex;
     -webkit-flex-direction: column;
@@ -111,7 +115,7 @@ div.stock, div.waste {
 
 div.modal {
     position: fixed;
-    top: 15%;
+    top: 12%;
     right: 5%;
     width:50%;
     min-width:300px;
