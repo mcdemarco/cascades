@@ -111,7 +111,7 @@ div.stock, div.waste {
 
 div.modal {
     position: fixed;
-    top: 15%;
+    top: 12%;
     right: 5%;
     width:50%;
     min-width:300px;
