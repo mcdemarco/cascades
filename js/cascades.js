@@ -12,7 +12,7 @@ cascades.Card = function(data) {
 
 cascades.Rules = function() {
 	return m("div", {className: "rules"}, [
-		m("p", "Click on the stock pile to turn over three cards at a time, as in Klondike.  When the stock is empty, click on the empty space to flip the waste over (redeal).  You get three passes (rounds) through the stock pile."),
+		m("p", "Click on the stock pile to turn over three cards at a time, as in Klondike.  When the stock is empty, click on the empty space to flip the waste over (redeal).  You get unlimited passes (rounds) through the stock pile."),
 		m("p", "Click on the waste pile to move a face-up card to the appropriate foundation row, if desired.  (A card can be moved to at most one of the rows at any particular time.)  Ranks can appear only once in a row and must start at the first row.  For example, a six cannot be placed in the third row until one has been placed in the second row.  For those unranked cards that occur in the deck more than three times (Crowns and the optional Aces, Pawns, and Courts), a second card cannot be added to the top row until a first one has appeared in all three rows."),
 		m("p", "Rank order does not matter within a row, but a suit from the new card must match the row.")
 	]);
@@ -210,8 +210,6 @@ cascades.turn = function(game) {
 	}
 	if (game.deck.length == 0) 
 		game.round++;
-	if (game.round > 3)
-		game.message += " No more rounds.";
 	return game;
 }
 
@@ -250,13 +248,9 @@ cascades.playReserve = function(game,row) {
 
 cascades.redeal = function(game) {
 	//The end of round flippy thing.
-	if (game.round > 3)
-		game.message = "No more rounds.";
-	else {
-		while (game.waste.length > 0) {
-			game.deck.push(game.waste.pop());
-			game.message = "Redealt.";
-		}
+	while (game.waste.length > 0) {
+		game.deck.push(game.waste.pop());
+		game.message = "Redealt.";
 	}
 	return game;
 };
@@ -295,7 +289,7 @@ variants.Version = function(data) {
 
 variants.VersionList = function() {
 	var list = [];
-	list.push(makeVersion("none", "Foundations Only", "An ultra-simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
+	list.push(makeVersion("none", "Foundations Only", "A simple version where you only play from the stock to the foundations.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
 	list.push(makeVersion("reserve", "Foundations with Reserve Piles", "A harder version where one of three reserve piles is uncovered after each round.", "at least one suit must be shared between the new card and the last (rightmost) card on that foundation row, if there is one."));
 	list.push(makeVersion("aces", "Foundations with Aces", "An easy version where the aces are removed from the deck and dealt out to the foundation rows to determine the suits of the row.", "at least one suit must be shared between the new card and the suits of the two aces next to that foundation row."));
 	return list;
@@ -418,7 +412,7 @@ variants.view = function(ctrl) {
 					m("p", ctrl.extended.filter(function(e) {return e.type() == m.route.param("extended"); })[0].description())
 				]),
 				m("div", {className: "roundWrapper"}, [
-					m("h2", "Round " + Math.min(ctrl.game.round,3)),
+					m("h2", "Round " + ctrl.game.round),
 					m("div", {className: "message"}, ctrl.game.message)
 				]),
 				// Stock and waste.
