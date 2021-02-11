@@ -18,10 +18,14 @@ html, body, div.bodyWrapper {
 
 body, div.bodyWrapper {
     height: 100vh;
+    min-height: 625px;
+    min-width: 1000px;
 }
 
 /* an unfortunate mithril necessity */
 div.bodyWrapper {
+    height: 625px;
+    width: 1000px;
     display: -webkit-flex;
     display: flex;
     -webkit-flex-direction: column;
